@@ -125,7 +125,6 @@ theorem exp_add (x y : ℝ) : exp (x + y) = exp x * exp y :=
   Subtype.ext <| by
     simp only [coe_exp, ofReal_add, add_mul, Complex.exp_add, coe_mul]
 
-@[simp]
 theorem exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp (x) ^ n :=
   Subtype.ext <| by
     rw [coe_pow, coe_exp, coe_exp, ← Complex.exp_nsmul, nsmul_eq_mul, nsmul_eq_mul, ofReal_mul,
