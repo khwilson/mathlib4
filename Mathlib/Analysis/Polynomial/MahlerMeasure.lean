@@ -388,7 +388,7 @@ lemma leadingCoeff_le_mahlerMeasure' :
   · have : v p.leadingCoeff = (p.map v).leadingCoeff := by
       refine leadingCoeff_map_of_leadingCoeff_ne_zero (R := A) (S := ℂ) v ?_ |>.symm
       simp [norm_map, leadingCoeff_ne_zero.mp hp, (not_iff_not.mpr norm_eq_zero).mp]
-    grw [← norm_map v, this, leading_coeff_le_mahlerMeasure, mahlerMeasure']
+    grw [← norm_map v, this, leadingCoeff_le_mahlerMeasure, mahlerMeasure']
 
 variable {p} in
 lemma Monic.one_le_mahlerMeasure' [NormOneClass A] (hp : p.Monic) :

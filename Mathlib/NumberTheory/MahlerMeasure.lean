@@ -143,7 +143,7 @@ lemma norm_leadingCoeff_eq_one_of_mahlerMeasure_eq_one :
     ‖(p.map (castRingHom ℂ)).leadingCoeff‖ = 1 := by
   rcases eq_or_ne p 0 with _ | hp
   · simp_all
-  have h_ineq := h ▸ (leading_coeff_le_mahlerMeasure <| p.map (castRingHom ℂ))
+  have h_ineq := h ▸ (leadingCoeff_le_mahlerMeasure <| p.map (castRingHom ℂ))
   rw [leadingCoeff_map_of_injective (castRingHom ℂ).injective_int, eq_intCast] at ⊢ h_ineq
   norm_cast at ⊢ h_ineq
   grind [leadingCoeff_eq_zero]
