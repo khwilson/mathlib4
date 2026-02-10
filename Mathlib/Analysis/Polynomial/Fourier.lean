@@ -54,17 +54,17 @@ lemma toAddCircle.integrable :
   simpa using (p.toAddCircle.continuous.continuousOn (s := Set.univ)).integrableOn_compact
     isCompact_univ
 
-theorem toAddCircle_C_fourier {c : ℂ} : (C c).toAddCircle = c • (fourier 0) := by
+theorem toAddCircle_C_eq_smul_fourier_zero {c : ℂ} : (C c).toAddCircle = c • (fourier 0) := by
   ext θ; simp [toAddCircle]
 
-theorem toAddCircle_X_fourier : (X : ℂ[X]).toAddCircle = fourier 1 := by
+theorem toAddCircle_X_eq_fourier_one : (X : ℂ[X]).toAddCircle = fourier 1 := by
   ext θ; simp [toAddCircle]
 
-theorem toAddCircle_X_pow_fourier {n : ℕ} : (X ^ n : ℂ[X]).toAddCircle = fourier n := by
+theorem toAddCircle_X_pow_eq_fourier {n : ℕ} : (X ^ n : ℂ[X]).toAddCircle = fourier n := by
   ext θ; simp [toAddCircle, AddCircle.toCircle_nsmul]
 
-theorem toAddCircle_C_mul_X_pow_fourier {n : ℕ} {c : ℂ} : ((C c) * (X : ℂ[X]) ^ n).toAddCircle =
-    c • fourier n := by
+theorem toAddCircle_C_mul_X_pow_eq_smul_fourier {n : ℕ} {c : ℂ} :
+    ((C c) * (X : ℂ[X]) ^ n).toAddCircle = c • fourier n := by
   ext θ; simp [toAddCircle, AddCircle.toCircle_nsmul]
 
 theorem toAddCircle_fourierCoeff_zcoeff (n : ℤ) :
@@ -78,7 +78,7 @@ theorem toAddCircle_fourierCoeff_zcoeff (n : ℤ) :
     | add p q hp hq => simp [hp, hq,
         fourierCoeff.add (toAddCircle.integrable p) (toAddCircle.integrable q)]
     | monomial k a =>
-        simp [← C_mul_X_pow_eq_monomial, toAddCircle_C_mul_X_pow_fourier,
+        simp [← C_mul_X_pow_eq_monomial, toAddCircle_C_mul_X_pow_eq_smul_fourier,
           fourierCoeff.const_smul _ a, fourierCoeff_fourier, Pi.single_apply]
         try grind [Int.natAbs_eq]
 
