@@ -136,8 +136,12 @@ def expHom : ℝ →+ Additive Circle where
 
 @[simp] lemma exp_sub (x y : ℝ) : exp (x - y) = exp x / exp y := expHom.map_sub x y
 @[simp] lemma exp_neg (x : ℝ) : exp (-x) = (exp x)⁻¹ := expHom.map_neg x
-@[simp] lemma exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp x ^ n := expHom.map_nsmul x n
-@[simp] lemma exp_zsmul (x : ℝ) (z : ℤ) : exp (z • x) = exp x ^ z := expHom.map_zsmul x z
+lemma exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp x ^ n := expHom.map_nsmul x n
+lemma exp_zsmul (x : ℝ) (z : ℤ) : exp (z • x) = exp x ^ z := expHom.map_zsmul x z
+@[simp] lemma exp_natCast_mul (x : ℝ) (n : ℕ) : exp (n * x) = exp x ^ n := by
+  rw [← nsmul_eq_mul, exp_nsmul]
+@[simp] lemma exp_intCast_mul (x : ℝ) (z : ℤ) : exp (z * x) = exp x ^ z := by
+  rw [← zsmul_eq_mul, exp_zsmul]
 
 lemma exp_pi_ne_one : Circle.exp Real.pi ≠ 1 := by
   intro h
