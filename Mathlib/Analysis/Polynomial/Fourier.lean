@@ -69,18 +69,14 @@ theorem toAddCircle_C_mul_X_pow_eq_smul_fourier {n : ℕ} {c : ℂ} :
 
 theorem toAddCircle_fourierCoeff_zcoeff (n : ℤ) :
     fourierCoeff (T := 2 * π) p.toAddCircle n = if 0 ≤ n then p.coeff n.natAbs else 0 := by
-  obtain (hn | ⟨k, rfl⟩) : n < 0 ∨ ∃ k : ℕ, n = k :=
-    lt_or_ge n 0 |>.imp_right Int.eq_ofNat_of_zero_le
-  all_goals
-    try simp only [not_le_of_gt hn, ↓reduceIte]
-    try simp only [Int.natCast_nonneg k, ↓reduceIte, Int.natAbs_natCast]
-    induction p using Polynomial.induction_on' with
-    | add p q hp hq => simp [hp, hq,
-        fourierCoeff.add (toAddCircle.integrable p) (toAddCircle.integrable q)]
-    | monomial k a =>
-        simp [← C_mul_X_pow_eq_monomial, toAddCircle_C_mul_X_pow_eq_smul_fourier,
-          fourierCoeff.const_smul _ a, fourierCoeff_fourier, Pi.single_apply]
-        try grind [Int.natAbs_eq]
+  have : n < 0 ∨ ∃ k : ℕ, n = k := lt_or_ge n 0 |>.imp_right Int.eq_ofNat_of_zero_le
+  induction p using Polynomial.induction_on' with obtain (hn | ⟨k, rfl⟩) := this
+  | add p q hp hq =>
+    simp_all [not_le_of_gt, fourierCoeff.add (toAddCircle.integrable p) (toAddCircle.integrable q)]
+  | monomial m a =>
+    simp_all [not_le_of_gt, coeff_monomial, toAddCircle_monomial_eq_smul_fourier,
+      fourierCoeff.const_smul, fourierCoeff_fourier, Pi.single_apply]
+    try grind
 
 theorem toAddCircle_fourierCoeff_coeff (n : ℕ) :
     fourierCoeff (T := 2 * π) p.toAddCircle n = p.coeff n := by
