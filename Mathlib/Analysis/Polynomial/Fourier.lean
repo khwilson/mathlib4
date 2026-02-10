@@ -63,8 +63,8 @@ theorem toAddCircle_X_eq_fourier_one : (X : ℂ[X]).toAddCircle = fourier 1 := b
 theorem toAddCircle_X_pow_eq_fourier {n : ℕ} : (X ^ n : ℂ[X]).toAddCircle = fourier n := by
   ext θ; simp [toAddCircle, AddCircle.toCircle_nsmul]
 
-theorem toAddCircle_C_mul_X_pow_eq_smul_fourier {n : ℕ} {c : ℂ} :
-    ((C c) * (X : ℂ[X]) ^ n).toAddCircle = c • fourier n := by
+theorem toAddCircle_monomial_eq_smul_fourier {n : ℕ} {c : ℂ} :
+    (monomial n c).toAddCircle = c • fourier n := by
   ext θ; simp [toAddCircle, AddCircle.toCircle_nsmul]
 
 theorem toAddCircle_fourierCoeff_zcoeff (n : ℤ) :
