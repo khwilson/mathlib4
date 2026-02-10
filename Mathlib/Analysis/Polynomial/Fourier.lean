@@ -86,7 +86,7 @@ theorem toAddCircle_fourierCoeff_coeff (n : ℕ) :
     fourierCoeff (T := 2 * π) p.toAddCircle n = p.coeff n := by
   simp [toAddCircle_fourierCoeff_zcoeff]
 
-theorem toAddCircle_fourierCoeff_eq_zero_of_neg (n : ℤ) (hn : n < 0) :
+theorem toAddCircle_fourierCoeff_eq_zero_of_lt_zero (n : ℤ) (hn : n < 0) :
     fourierCoeff (T := 2 * π) p.toAddCircle n = 0 := by
   simp [toAddCircle_fourierCoeff_zcoeff, hn]
 
