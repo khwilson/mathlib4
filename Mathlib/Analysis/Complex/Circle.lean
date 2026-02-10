@@ -81,6 +81,7 @@ lemma coe_inv_eq_conj (z : Circle) : ↑z⁻¹ = conj (z : ℂ) := by
 
 @[simp, norm_cast] lemma coe_div (z w : Circle) : ↑(z / w) = (z : ℂ) / w := rfl
 @[simp, norm_cast] lemma coe_pow (z : Circle) (n : ℕ) : ↑(z ^ n) = (z : ℂ) ^ n := rfl
+@[simp, norm_cast] lemma coe_zpow (z : Circle) (n : ℤ) : ↑(z ^ n) = (z : ℂ) ^ n := rfl
 
 /-- The coercion `Circle → ℂ` as a monoid homomorphism. -/
 @[simps]
@@ -125,11 +126,6 @@ theorem exp_add (x y : ℝ) : exp (x + y) = exp x * exp y :=
   Subtype.ext <| by
     simp only [coe_exp, ofReal_add, add_mul, Complex.exp_add, coe_mul]
 
-theorem exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp (x) ^ n :=
-  Subtype.ext <| by
-    rw [coe_pow, coe_exp, coe_exp, ← Complex.exp_nsmul, nsmul_eq_mul, nsmul_eq_mul, ofReal_mul,
-      ofReal_natCast, mul_assoc]
-
 /-- The map `fun t => exp (t * I)` from `ℝ` to the unit circle in `ℂ`,
 considered as a homomorphism of groups. -/
 @[simps]
@@ -140,6 +136,8 @@ def expHom : ℝ →+ Additive Circle where
 
 @[simp] lemma exp_sub (x y : ℝ) : exp (x - y) = exp x / exp y := expHom.map_sub x y
 @[simp] lemma exp_neg (x : ℝ) : exp (-x) = (exp x)⁻¹ := expHom.map_neg x
+@[simp] lemma exp_nsmul (x : ℝ) (n : ℕ) : exp (n • x) = exp (x) ^ n := expHom.map_nsmul x n
+@[simp] lemma exp_zsmul (x : ℝ) (n : ℤ) : exp (n • x) = exp (x) ^ n := expHom.map_zsmul x n
 
 lemma exp_pi_ne_one : Circle.exp Real.pi ≠ 1 := by
   intro h

@@ -311,30 +311,29 @@ theorem fourierCoeff_eq_intervalIntegral (f : AddCircle T → E) (n : ℤ) (a : 
 
 theorem MeasureTheory.Integrable.fourier_smul {f : AddCircle T → E}
     (hf : Integrable f haarAddCircle) (n : ℤ) :
-    Integrable (fun t ↦ fourier (-n) t • f t) haarAddCircle := by
+    Integrable (fun t ↦ fourier n t • f t) haarAddCircle := by
   apply hf.bdd_smul 1
-  · exact (map_continuous (fourier (-n))).aestronglyMeasurable
+  · exact (map_continuous (fourier n)).aestronglyMeasurable
   · apply ae_of_all; intro t
     rw [fourier_apply, Circle.norm_coe]
 
 theorem fourierCoeff.add {f g : AddCircle T → E} (hf : Integrable f haarAddCircle)
     (hg : Integrable g haarAddCircle) :
     fourierCoeff (f + g) = fourierCoeff f + fourierCoeff g := by
-  unfold fourierCoeff
-  simp_rw [Pi.add_apply, smul_add, integral_add (hf.fourier_smul _) (hg.fourier_smul _)]
-  rfl
+  ext x
+  simpa [fourierCoeff, -fourier_apply] using integral_add (hf.fourier_smul _) (hg.fourier_smul _)
 
 theorem fourierCoeff.sum {ι : Type*} (s : Finset ι) (f : ι → AddCircle T → E)
     (hf : ∀ i ∈ s, Integrable (f i) haarAddCircle) :
     fourierCoeff (∑ i ∈ s, f i) = ∑ i ∈ s, fourierCoeff (f i) := by
   classical
   induction s using Finset.induction_on with
-  | empty => unfold fourierCoeff; simpa using (by rfl)
+  | empty => ext; simp [fourierCoeff]
   | insert a s ha iha =>
-      rw [Finset.sum_insert ha, Finset.sum_insert ha]
-      have : ∀ i ∈ s, Integrable (f i) haarAddCircle := fun i hi => by simp [hf i, hi]
-      rw [fourierCoeff.add (hf a (Finset.mem_insert_self a s)) (integrable_finset_sum' s this),
-        iha this]
+      obtain ⟨hf₁, hf₂⟩ := by simpa using hf
+      rw [s.sum_insert ha, s.sum_insert ha,
+        fourierCoeff.add hf₁ (integrable_finset_sum' s hf₂), iha hf₂]
+
 
 theorem fourierCoeff.const_smul (f : AddCircle T → E) (c : ℂ) (n : ℤ) :
     fourierCoeff (c • f :) n = c • fourierCoeff f n := by
@@ -515,7 +514,7 @@ end ScopeHT
 section computations
 
 theorem fourierCoeff_fourier {T : ℝ} [hT : Fact (0 < T)] (n : ℤ) :
-    fourierCoeff (hT := hT) (fourier n) = Pi.single n 1 := by
+    fourierCoeff (T := T) (fourier n) = Pi.single n 1 := by
   ext m
   rw [← fourierCoeff_congr_ae (coeFn_fourierLp 2 n), ← fourierBasis_repr,
     HilbertBasis.repr_apply_apply, coe_fourierBasis]
