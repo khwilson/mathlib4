@@ -6,9 +6,7 @@ Authors: Kevin H. Wilson
 module
 
 public import Mathlib.Analysis.Fourier.AddCircle
-public import Mathlib.Analysis.SpecialFunctions.Integrals.Basic
 public import Mathlib.MeasureTheory.Integral.CircleAverage
-public import Mathlib.Topology.Algebra.Polynomial
 
 /-!
 # Fourier Coefficients of Polynomials
