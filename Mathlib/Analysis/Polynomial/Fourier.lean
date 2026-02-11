@@ -54,7 +54,7 @@ lemma toAddCircle.integrable :
   simpa using (p.toAddCircle.continuous.continuousOn (s := Set.univ)).integrableOn_compact
     isCompact_univ
 
-theorem toAddCircle_C_eq_smul_fourier_zero {c : ℂ} : (C c).toAddCircle = c • (fourier 0) := by
+theorem toAddCircle_C_eq_smul_fourier_zero {c : ℂ} : (C c).toAddCircle = c • fourier 0 := by
   ext θ; simp [toAddCircle]
 
 theorem toAddCircle_X_eq_fourier_one : (X : ℂ[X]).toAddCircle = fourier 1 := by
