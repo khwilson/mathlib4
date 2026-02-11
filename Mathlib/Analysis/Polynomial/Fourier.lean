@@ -27,8 +27,8 @@ coefficients match Fourier coefficients and prove Parseval's identity for polyno
 - `Polynomial.fourierCoeff_toAddCircle_natCast`: A variant of `Polynomial.fourierCoeff_toAddCircle`
   for `ℕ` arguments.
 - `Polynomial.sum_sq_norm_coeff_eq_circleAverage`: Parseval's identity that the sum of the squares
-  of the norms of the coefficients equals the average over the circle of the norm square.
-
+  of the norms of the coefficients of a polynomial equals the average over the circle of the norm
+  square of the polynomial.
 -/
 
 open Complex MeasureTheory Set AddCircle
@@ -49,8 +49,7 @@ noncomputable def toAddCircle : ℂ[X] →ₐ[ℂ] C(AddCircle (2 * π), ℂ) :=
 
 lemma toAddCircle.integrable :
     Integrable p.toAddCircle (haarAddCircle (T := 2 * π)) := by
-  simpa using (p.toAddCircle.continuous.continuousOn (s := Set.univ)).integrableOn_compact
-    isCompact_univ
+  simpa using p.toAddCircle.continuous.continuousOn.integrableOn_compact isCompact_univ
 
 theorem toAddCircle_C_eq_smul_fourier_zero {c : ℂ} : (C c).toAddCircle = c • fourier 0 := by
   ext θ; simp [toAddCircle]
@@ -112,5 +111,4 @@ theorem sum_sq_norm_coeff_eq_circleAverage : ∑ i ∈ p.support, ‖p.coeff i�
   simp [toAddCircle, toCircle, circleMap]
 
 end complex
-
 end Polynomial
