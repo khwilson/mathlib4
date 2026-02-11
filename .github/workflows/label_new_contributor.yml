@@ -79,19 +79,27 @@ jobs:
               });
 
               // Check if we already posted a welcome comment (idempotency)
-              const comments = await github.rest.issues.listComments({
-                issue_number: context.issue.number,
-                owner,
-                repo,
-              });
-              const alreadyWelcomed = comments.data.some(c =>
-                c.user.login === 'github-actions[bot]' &&
-                c.body.includes('Welcome new contributor')
-              );
+              const WELCOME_MARKER = '<!-- mathlib-welcome-comment -->';
+              let alreadyWelcomed = false;
+              for await (const response of github.paginate.iterator(
+                github.rest.issues.listComments,
+                {
+                  issue_number: context.issue.number,
+                  owner,
+                  repo,
+                  per_page: 100,
+                }
+              )) {
+                if (response.data.some(c => c.body.includes(WELCOME_MARKER))) {
+                  alreadyWelcomed = true;
+                  break;
+                }
+              }
 
               if (!alreadyWelcomed) {
                 console.log('Posting welcome comment for new contributor...');
                 const body = [
+                  WELCOME_MARKER,
                   '## Welcome new contributor!',
                   'Thank you for contributing to Mathlib! If you haven\'t done so already, please review our [contribution guidelines](https://leanprover-community.github.io/contribute/index.html), as well as the [style guide](https://leanprover-community.github.io/contribute/style.html) and [naming conventions](https://leanprover-community.github.io/contribute/naming.html).',
                   '',
