@@ -279,7 +279,7 @@ theorem mahlerMeasure_le_sum_norm_coeff (p : ℂ[X]) : p.mahlerMeasure ≤ p.sum
     simp
 
 set_option linter.style.emptyLine false in
-open MeasureTheory Real Set in
+open MeasureTheory Set in
 /-- The Mahler measure of a polynomial is at most the sup norm of the polynomial times the square
 root of its degree plus one. -/
 theorem mahlerMeasure_le_sqrt_natDegree_add_one_mul_supNorm (p : Polynomial ℂ) :
