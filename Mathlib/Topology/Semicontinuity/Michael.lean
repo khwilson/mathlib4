@@ -67,86 +67,54 @@ lemma foo (G : α → Set β) (hG_convex : ∀ x, Convex ℝ (G x))
     exact hφ x' (subset_tsupport _ (Function.mem_support.mpr hx'))
 
 open Metric Set in
-theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc : ∀ x, IsClosed (f x)) (hfv : ∀ x, Convex ℝ (f x)) :
+theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc : ∀ x, IsClosed (f x))
+    (hfv : ∀ x, Convex ℝ (f x)) :
     ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
-  choose F hF using hfe
+  obtain ⟨g, hg_cont, hg_mem⟩ := foo _ (fun x ↦ (hfv x).thickening 1) sorry (by simp [hfe])
 
-  let U : ℝ → α → Set α := fun ε x ↦ (f ⁻¹' (Iic (ball (F x) ε)ᶜ))ᶜ
-  have hU_open : ∀ ε x, IsOpen (U ε x) := fun ε x ↦
-      lowerHemicontinuous_iff_isOpen_compl_preimage_Iic_compl.mp hf _ isOpen_ball
+  -- State exactly what we want our sequence to satisfy
+  obtain ⟨h, h_zero, h_cont, h_mem, h_dist⟩ : ∃ h : ℕ → α → β,
+      h 0 = g ∧
+      (∀ n, Continuous (h n)) ∧
+      (∀ n x, h n x ∈ thickening ((2 : ℝ)⁻¹ ^ n) (f x)) ∧
+      (∀ n x, dist (h (n + 1) x) (h n x) < (2 : ℝ)⁻¹ ^ (n + 1)) := by
 
-  have hU_rw : ∀ ε x, U ε x = {x' | (f x' ∩ (ball (F x) ε)).Nonempty} := by
-    simp [U, Set.ext_iff, Iic, Set.mem_compl_iff, Set.not_subset, Set.Nonempty]
+    -- 1. Define the invariant property for each approximation step
+    let P := fun (n : ℕ) (h_curr : α → β) ↦
+      Continuous h_curr ∧ ∀ x, h_curr x ∈ thickening ((2 : ℝ)⁻¹ ^ n) (f x)
 
-  have hU_mem : ∀ ε x, 0 < ε → x ∈ U ε x := by
-    intro ε x hε
-    rw [hU_rw]
-    use F x
-    simp [hF, hε]
+    -- 2. Prove the inductive step locally
+    have step : ∀ (n : ℕ) (hn : α → β), P n hn →
+        ∃ h_next, P (n + 1) h_next ∧ ∀ x, dist (h_next x) (hn x) < (2 : ℝ)⁻¹ ^ (n + 1) := by
+      intro n hn hn_prop
+      obtain ⟨h', hh'_cont, hh'_mem⟩ := foo (fun x ↦ (thickening ((2 : ℝ)⁻¹ ^ (n + 1)) (f x)) ∩ ball (hn x) ((2 : ℝ)⁻¹ ^ (n + 1))) sorry sorry sorry
+      use h'
+      simp only [hh'_cont, true_and, P]
+      constructor
+      · intro x
+        simpa using (hh'_mem x).1
+      · intro x
+        simpa using (hh'_mem x).2
 
-  have hU_cover : ∀ ε, 0 < ε → (⋃ x, U ε x) = Set.univ := by
-    intro ε hε
-    ext x
-    constructor
-    · simp
-    · intro _
-      refine mem_iUnion.mpr ?_
-      exact ⟨x, hU_mem ε x hε⟩
+    -- 3. Construct the sequence using dependent recursion via Nat.recOn
+    -- We bundle the function and its invariant proof into a Subtype.
+    let h_seq : (n : ℕ) → {h' // P n h'} := fun n ↦
+      Nat.recOn (motive := fun k ↦ {h' // P k h'}) n
+        -- Base case (n = 0): Supply g and prove it satisfies P 0
+        ⟨g, hg_cont, by simp [hg_mem]⟩
+        -- Inductive step (n = k + 1)
+        (fun k curr ↦
+          -- Extract the witness and proof from our `step` lemma
+          let h_next := Classical.choose (step k curr.val curr.prop)
+          let h_spec := Classical.choose_spec (step k curr.val curr.prop)
+          ⟨h_next, h_spec.1⟩)
 
-  have : ∀ ε, 0 < ε → ∃ (f : PartitionOfUnity α α univ), f.IsSubordinate (U ε) := by
-    intro ε hε
-    exact PartitionOfUnity.exists_isSubordinate isClosed_univ (U ε) (hU_open ε) (by simp [hU_cover ε hε])
-  choose φ hφ using this
+    -- 4. Provide the extracted sequence to satisfy the `∃` goal
+    refine ⟨fun n ↦ (h_seq n).val, rfl, fun n ↦ (h_seq n).prop.1, fun n ↦ (h_seq n).prop.2, ?_⟩
 
-  have : ∀ ε, (hε : 0 < ε) → ∀ x, Summable (fun x' ↦ (φ ε hε x' x) • (F x')) := by
-    intro ε hε x
-    apply summable_of_hasFiniteSupport
-    exact ((φ ε hε).locallyFinite.point_finite x).subset (Function.support_smul_subset_left _ _)
-
-  let g : (ε : ℝ) → (0 < ε) → α → β := fun ε hε x ↦ ∑' x', (φ ε hε x' x) • (F x')
-  have hg_cont : ∀ ε, (hε : 0 < ε) → Continuous (g ε hε) := by
-    intro ε hε
-    rw [continuous_iff_continuousAt]
-    intro x
-    simp only [g]
-    refine ContinuousAt.congr (f := (fun x ↦ ∑ᶠ (x' : α), ((φ ε hε) x') x • F x')) ?_ ?_
-    · exact ((φ ε hε).continuous_finsum_smul (fun i _ _ ↦ continuousAt_const)).continuousAt
-    · apply Filter.Eventually.of_forall
-      intro y
-      symm
-      exact tsum_eq_finsum (((φ ε hε).locallyFinite.point_finite y).subset
-        (Function.support_smul_subset_left _ _))
-  have hg_infdist : ∀ ε, (hε : 0 < ε) → ∀ x, infDist (g ε hε x) (f x) < ε := by
-    intro ε hε x
-    have heq : g ε hε x = ∑ᶠ x', (φ ε hε x' x) • F x' :=
-      tsum_eq_finsum (((φ ε hε).locallyFinite.point_finite x).subset
-        (Function.support_smul_subset_left _ _))
-    rw [heq, ← Metric.mem_thickening_iff_infDist_lt ⟨F x, hF x⟩]
-    apply ((hfv x).thickening ε).finsum_mem
-        (fun x' ↦ (φ ε hε).nonneg x' x)
-        ((φ ε hε).sum_eq_one (mem_univ x))
-    intro x' hx'
-    rw [Metric.mem_thickening_iff]
-    have hx_in : x ∈ U ε x' :=
-      hφ ε hε x' (subset_tsupport _ (Function.mem_support.mpr hx'))
-    rw [hU_rw] at hx_in
-    obtain ⟨z, hz_f, hz_ball⟩ := hx_in
-    exact ⟨z, hz_f, mem_ball'.mp hz_ball⟩
-
-  -- Goal is to do it again, but now we get a sequence of functions h:
-  let h : ℕ → α → β
-  | 0 => g 1 (by linarith)
-  | n + 1 => sorry
-
-
-  obtain ⟨h, hh_cont, hh_setdist⟩ : ∃ h : ℕ → α → β, (∀ n, Continuous (h n)) ∧ (∀ n x, infDist (h n x) (f x) < ((2 : ℝ)⁻¹) ^ n) ∧ (∀ n x, ‖h (n + 1) x - h n x‖ < ((2 : ℝ)⁻¹) ^ n) := by
-
-    sorry
-
-  -- let h : ℕ → α → β := sorry
-  -- have hh_cont : ∀ n, Continuous (h n) := sorry
-  -- have hh_setdist : ∀ n x, infDist (h n x) (f x) < ((2 : ℝ)⁻¹) ^ n := sorry
-  -- have hh_precauchy : ∀ n x, ‖h (n + 1) x - h n x‖ < ((2 : ℝ)⁻¹) ^ n  := sorry
+    -- 5. Prove the distance bound for the sequence
+    intro n x
+    exact (Classical.choose_spec (step n (h_seq n).val (h_seq n).prop)).2 x
 
   have : ∀ x, CauchySeq (fun n ↦ h n x) := sorry
   choose H hH using fun x ↦ cauchySeq_tendsto_of_complete (this x)
@@ -163,7 +131,7 @@ theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc 
   constructor
   · apply this.continuous
     apply Filter.Frequently.of_forall
-    exact hh_cont
+    exact h_cont
   · sorry
 
 end
