@@ -28,45 +28,34 @@ TODO: The `NormalSpace` assumption is not necessary but requires some workaround
 
 public section
 
+open Set
+
 variable {α β : Type*} [TopologicalSpace α] [NormalSpace α] [ParacompactSpace α]
-  [NormedAddCommGroup β] [NormedSpace ℝ β] [CompleteSpace β] [TopologicalSpace.SeparableSpace β]
+  [NormedAddCommGroup β] [NormedSpace ℝ β]
   {f : α → Set β}
 
+/-- An approximate version of Michael's selection theorem: Any paracompact space which admits
+partitions of unity admits continuous _approximate_ selections. In order that these approximate
+selections converge, to a true selection, the target space must be a `CompleteSpace` and a
+`TopologicalSpace.SeparableSpace`. See `XXX`. -/
 lemma foo (G : α → Set β) (hG_convex : ∀ x, Convex ℝ (G x))
     (hG_section : ∀ b : β, IsOpen {x | b ∈ G x}) (hG_nonempty : ∀ x, (G x).Nonempty) :
     ∃ h : α → β, Continuous h ∧ ∀ x, h x ∈ G x := by
   choose F hF using hG_nonempty
-  -- Open cover: U x' = {y | F x' ∈ G y}, open by hG_section; self-covers since F x' ∈ G x'
   let U : α → Set α := fun x' ↦ {y | F x' ∈ G y}
-  have hU_open : ∀ x', IsOpen (U x') := fun x' ↦ hG_section (F x')
-  have hU_mem : ∀ x', x' ∈ U x' := hF
-  have hU_cover : (⋃ x', U x') = Set.univ := by
-    ext x; simp only [Set.mem_iUnion, Set.mem_univ, iff_true]; exact ⟨x, hU_mem x⟩
-  obtain ⟨φ, hφ⟩ := PartitionOfUnity.exists_isSubordinate isClosed_univ U hU_open
-    hU_cover.symm.subset
-  let h : α → β := fun y ↦ ∑' x', (φ x' y : ℝ) • F x'
-  refine ⟨h, ?_, ?_⟩
-  · -- Continuity of h
-    rw [continuous_iff_continuousAt]
-    intro y; simp only [h]
-    refine ContinuousAt.congr (f := fun y ↦ ∑ᶠ x', (φ x' y : ℝ) • F x') ?_ ?_
-    · exact (φ.continuous_finsum_smul (fun i _ _ ↦ continuousAt_const)).continuousAt
-    · apply Filter.Eventually.of_forall; intro z; symm
-      exact tsum_eq_finsum ((φ.locallyFinite.point_finite z).subset
-        (Function.support_smul_subset_left _ _))
-  · -- h y ∈ G y: each F x' in the support satisfies F x' ∈ G y (from y ∈ U x')
-    intro y
-    have heq : h y = ∑ᶠ x', (φ x' y : ℝ) • F x' :=
-      tsum_eq_finsum ((φ.locallyFinite.point_finite y).subset
-        (Function.support_smul_subset_left _ _))
-    rw [heq]
-    apply (hG_convex y).finsum_mem
-        (fun x' ↦ φ.nonneg x' y)
-        (φ.sum_eq_one (Set.mem_univ y))
+  have hU_cover : (⋃ x', U x') = univ := by ext x; simpa using ⟨x, hF x⟩
+  obtain ⟨φ, hφ⟩ := PartitionOfUnity.exists_isSubordinate isClosed_univ U
+    (fun x' ↦ hG_section (F x')) hU_cover.symm.subset
+  let h : α → β := fun y ↦ ∑ᶠ x', (φ x' y : ℝ) • F x'
+  refine ⟨h, φ.continuous_finsum_smul (fun _ _ _ ↦ continuousAt_const), ?_⟩
+  · intro y
+    apply (hG_convex y).finsum_mem (by simp [φ.nonneg]) (φ.sum_eq_one (mem_univ y))
     intro x' hx'
     exact hφ x' (subset_tsupport _ (Function.mem_support.mpr hx'))
 
-open Metric Set in
+variable [CompleteSpace β] [TopologicalSpace.SeparableSpace β]
+
+open Metric in
 theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc : ∀ x, IsClosed (f x))
     (hfv : ∀ x, Convex ℝ (f x)) :
     ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
@@ -116,7 +105,10 @@ theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc 
     intro n x
     exact (Classical.choose_spec (step n (h_seq n).val (h_seq n).prop)).2 x
 
-  have : ∀ x, CauchySeq (fun n ↦ h n x) := sorry
+  have : ∀ x, CauchySeq (fun n ↦ h n x) := fun x ↦
+    cauchySeq_of_le_geometric (2 : ℝ)⁻¹ (2 : ℝ)⁻¹ (by norm_num) fun n ↦ by
+      rw [dist_comm]
+      exact le_of_lt ((h_dist n x).trans_eq (by ring))
   choose H hH using fun x ↦ cauchySeq_tendsto_of_complete (this x)
   use H
 
@@ -126,12 +118,30 @@ theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc 
     obtain ⟨n, hn⟩ := ((tendsto_pow_atTop_nhds_zero_of_lt_one (r := (2 : ℝ)⁻¹) (by norm_num) (by norm_num)).eventually ((gt_mem_nhds hε))).exists
     filter_upwards [Filter.eventually_ge_atTop n] with m hm
     intro x
-    sorry
+    rw [dist_comm]
+    have hu : ∀ k, dist (h k x) (h (k + 1) x) ≤ (2 : ℝ)⁻¹ * (2 : ℝ)⁻¹ ^ k := fun k ↦ by
+      rw [dist_comm]; exact le_of_lt ((h_dist k x).trans_eq (by ring))
+    calc dist (h m x) (H x)
+        ≤ (2 : ℝ)⁻¹ * (2 : ℝ)⁻¹ ^ m / (1 - (2 : ℝ)⁻¹) :=
+          dist_le_of_le_geometric_of_tendsto (2 : ℝ)⁻¹ (2 : ℝ)⁻¹ (by norm_num) hu (hH x) m
+      _ = (2 : ℝ)⁻¹ ^ m := by field_simp; ring
+      _ ≤ (2 : ℝ)⁻¹ ^ n := pow_le_pow_of_le_one (by norm_num) (by norm_num) hm
+      _ < ε := hn
 
   constructor
   · apply this.continuous
     apply Filter.Frequently.of_forall
     exact h_cont
-  · sorry
+  · intro x
+    have hinfDist : ∀ n, infDist (h n x) (f x) < (2 : ℝ)⁻¹ ^ n := fun n ↦ by
+      rw [← Metric.mem_thickening_iff_infDist_lt (hfe x)]; exact h_mem n x
+    have hconv : Filter.Tendsto (fun n ↦ infDist (h n x) (f x))
+        Filter.atTop (nhds (infDist (H x) (f x))) :=
+      ((continuous_infDist_pt (f x)).tendsto (H x)).comp (hH x)
+    have h0 : infDist (H x) (f x) = 0 :=
+      tendsto_nhds_unique hconv <| squeeze_zero (fun _ ↦ infDist_nonneg)
+        (fun n ↦ (hinfDist n).le)
+        (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num))
+    exact (hfc x).mem_iff_infDist_zero (hfe x) |>.mpr h0
 
 end
