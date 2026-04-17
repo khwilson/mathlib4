@@ -32,104 +32,39 @@ variable {α β : Type*} [TopologicalSpace α] [NormalSpace α] [ParacompactSpac
   [NormedAddCommGroup β] [NormedSpace ℝ β] [CompleteSpace β] [TopologicalSpace.SeparableSpace β]
   {f : α → Set β}
 
-open Metric in
-lemma foo (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfv : ∀ x, Convex ℝ (f x))
-    (g : α → β) (hg_cont : Continuous g) (ε : ℝ)
-    (hg_setdist : ∀ x, infDist (g x) (f x) < ε) :
-    ∃ h : α → β, Continuous h ∧ (∀ x, infDist (h x) (f x) < ε / 2)
-      ∧ (∀ x, dist (h x) (g x) < ε / 2) := by
-  -- Choose F(x) ∈ f(x) with dist(g(x), F(x)) < ε
-  have hF_exists : ∀ x, ∃ y ∈ f x, dist (g x) y < ε :=
-    fun x => (Metric.infDist_lt_iff (hfe x)).mp (hg_setdist x)
-  choose F hF_mem hF_dist using hF_exists
-  -- V x' is the midpoint of g x' and F x'; both lie within ε/2 of V x'
-  let V : α → β := fun x' ↦ (2 : ℝ)⁻¹ • (g x' + F x')
-  have hV_gdist : ∀ x', dist (g x') (V x') < ε / 2 := fun x' => by
-    have heq : dist (g x') (V x') = dist (g x') (F x') / 2 := by
-      rw [dist_eq_norm, dist_eq_norm]
-      have : g x' - V x' = (2 : ℝ)⁻¹ • (g x' - F x') := by simp only [V]; module
-      rw [this, norm_smul, show ‖(2 : ℝ)⁻¹‖ = (2 : ℝ)⁻¹ from
-          Real.norm_of_nonneg (by positivity)]
-      ring
-    linarith [hF_dist x']
-  have hV_Fdist : ∀ x', dist (F x') (V x') < ε / 2 := fun x' => by
-    have heq : dist (F x') (V x') = dist (g x') (F x') / 2 := by
-      rw [dist_eq_norm, dist_eq_norm]
-      have : F x' - V x' = (2 : ℝ)⁻¹ • (F x' - g x') := by simp only [V]; module
-      rw [this, norm_smul, show ‖(2 : ℝ)⁻¹‖ = (2 : ℝ)⁻¹ from
-          Real.norm_of_nonneg (by positivity), norm_sub_rev (F x') (g x')]
-      ring
-    linarith [hF_dist x']
-  -- Open cover: LHC ball of radius ε/2 and g-preimage ball of radius ε/2, both at V x'
-  let U : α → Set α := fun x' ↦
-    (f ⁻¹' (Set.Iic (ball (V x') (ε / 2))ᶜ))ᶜ ∩ g ⁻¹' (ball (V x') (ε / 2))
-  have hU_open : ∀ x', IsOpen (U x') := fun x' ↦
-    (lowerHemicontinuous_iff_isOpen_compl_preimage_Iic_compl.mp hf _
-      isOpen_ball).inter (isOpen_ball.preimage hg_cont)
-  have hU_rw : ∀ x' y, y ∈ U x' ↔
-      (f y ∩ ball (V x') (ε / 2)).Nonempty ∧ g y ∈ ball (V x') (ε / 2) := by
-    intro x' y
-    simp only [U, Set.mem_inter_iff, Set.mem_compl_iff, Set.mem_preimage, Set.mem_Iic,
-               Set.Nonempty, Set.mem_inter_iff]
-    refine and_congr ?_ Iff.rfl
-    constructor
-    · intro h
-      obtain ⟨z, hz1, hz2⟩ := Set.not_subset.mp h
-      simp only [Set.mem_compl_iff, not_not] at hz2
-      exact ⟨z, hz1, hz2⟩
-    · rintro ⟨z, hz1, hz2⟩
-      apply Set.not_subset.mpr
-      exact ⟨z, hz1, by simp only [Set.mem_compl_iff, not_not]; exact hz2⟩
-  -- x' ∈ U x': F x' witnesses the LHC condition; g x' satisfies the g condition
-  have hU_mem : ∀ x', x' ∈ U x' := fun x' => by
-    rw [hU_rw]
-    exact ⟨⟨F x', hF_mem x', mem_ball.mpr (hV_Fdist x')⟩, mem_ball.mpr (hV_gdist x')⟩
+lemma foo (G : α → Set β) (hG_convex : ∀ x, Convex ℝ (G x))
+    (hG_section : ∀ b : β, IsOpen {x | b ∈ G x}) (hG_nonempty : ∀ x, (G x).Nonempty) :
+    ∃ h : α → β, Continuous h ∧ ∀ x, h x ∈ G x := by
+  choose F hF using hG_nonempty
+  -- Open cover: U x' = {y | F x' ∈ G y}, open by hG_section; self-covers since F x' ∈ G x'
+  let U : α → Set α := fun x' ↦ {y | F x' ∈ G y}
+  have hU_open : ∀ x', IsOpen (U x') := fun x' ↦ hG_section (F x')
+  have hU_mem : ∀ x', x' ∈ U x' := hF
   have hU_cover : (⋃ x', U x') = Set.univ := by
     ext x; simp only [Set.mem_iUnion, Set.mem_univ, iff_true]; exact ⟨x, hU_mem x⟩
   obtain ⟨φ, hφ⟩ := PartitionOfUnity.exists_isSubordinate isClosed_univ U hU_open
     hU_cover.symm.subset
-  let h : α → β := fun y ↦ ∑' x', (φ x' y : ℝ) • V x'
-  refine ⟨h, ?_, ?_, ?_⟩
+  let h : α → β := fun y ↦ ∑' x', (φ x' y : ℝ) • F x'
+  refine ⟨h, ?_, ?_⟩
   · -- Continuity of h
     rw [continuous_iff_continuousAt]
     intro y; simp only [h]
-    refine ContinuousAt.congr (f := fun y ↦ ∑ᶠ x', (φ x' y : ℝ) • V x') ?_ ?_
+    refine ContinuousAt.congr (f := fun y ↦ ∑ᶠ x', (φ x' y : ℝ) • F x') ?_ ?_
     · exact (φ.continuous_finsum_smul (fun i _ _ ↦ continuousAt_const)).continuousAt
     · apply Filter.Eventually.of_forall; intro z; symm
       exact tsum_eq_finsum ((φ.locallyFinite.point_finite z).subset
         (Function.support_smul_subset_left _ _))
-  · -- infDist bound: each V x' ∈ thickening(f y, ε/2) since f y ∩ ball(V x', ε/2) ≠ ∅
+  · -- h y ∈ G y: each F x' in the support satisfies F x' ∈ G y (from y ∈ U x')
     intro y
-    have heq : h y = ∑ᶠ x', (φ x' y : ℝ) • V x' :=
+    have heq : h y = ∑ᶠ x', (φ x' y : ℝ) • F x' :=
       tsum_eq_finsum ((φ.locallyFinite.point_finite y).subset
         (Function.support_smul_subset_left _ _))
-    rw [heq, ← Metric.mem_thickening_iff_infDist_lt (hfe y)]
-    apply ((hfv y).thickening (ε / 2)).finsum_mem
+    rw [heq]
+    apply (hG_convex y).finsum_mem
         (fun x' ↦ φ.nonneg x' y)
         (φ.sum_eq_one (Set.mem_univ y))
     intro x' hx'
-    rw [Metric.mem_thickening_iff]
-    have hy_in : y ∈ U x' :=
-      hφ x' (subset_tsupport _ (Function.mem_support.mpr hx'))
-    rw [hU_rw] at hy_in
-    obtain ⟨⟨z, hz_f, hz_ball⟩, -⟩ := hy_in
-    exact ⟨z, hz_f, mem_ball'.mp hz_ball⟩
-  · -- dist bound: each V x' ∈ ball(g y, ε/2) since g y ∈ ball(V x', ε/2)
-    intro y
-    have heq : h y = ∑ᶠ x', (φ x' y : ℝ) • V x' :=
-      tsum_eq_finsum ((φ.locallyFinite.point_finite y).subset
-        (Function.support_smul_subset_left _ _))
-    rw [heq, ← mem_ball]
-    apply (convex_ball (g y) (ε / 2)).finsum_mem
-        (fun x' ↦ φ.nonneg x' y)
-        (φ.sum_eq_one (Set.mem_univ y))
-    intro x' hx'
-    have hy_in : y ∈ U x' :=
-      hφ x' (subset_tsupport _ (Function.mem_support.mpr hx'))
-    rw [hU_rw] at hy_in
-    obtain ⟨-, hy_ball⟩ := hy_in
-    rw [mem_ball, dist_comm]
-    exact mem_ball.mp hy_ball
+    exact hφ x' (subset_tsupport _ (Function.mem_support.mpr hx'))
 
 open Metric Set in
 theorem michael (hf : LowerHemicontinuous f) (hfe : ∀ x, (f x).Nonempty) (hfc : ∀ x, IsClosed (f x)) (hfv : ∀ x, Convex ℝ (f x)) :
