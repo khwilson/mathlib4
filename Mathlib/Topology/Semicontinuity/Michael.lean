@@ -5,6 +5,7 @@ Authors: Kevin H. Wilson
 -/
 module
 
+public import Mathlib.Analysis.Convex.Combination
 public import Mathlib.Analysis.Normed.Module.Convex
 public import Mathlib.Topology.Semicontinuity.Hemicontinuity
 public import Mathlib.Topology.Semicontinuity.Metric
@@ -18,17 +19,17 @@ convex closed nonempty values admits a continuous selection.
 
 ## Main results
 
-- `HasOpenLowerSections.approx_of_convex_nonempty`: A correspondence with open lower sections and
+- `HasOpenLowerSections.exists_continuous_selection`: A correspondence with open lower sections and
   convex, nonempty values admits a continuous selection. A key ingredient to the proof of Michael's
-  selction theorem
-- `LowerHemicontinuous.approx_of_convex_closed_nonempty`: Michael's selection theorem that a
-  lower hemicontinous function from a paracompact space to a Banach space which takes
-  convex, closed, nonempty values admits a continuous selection
+  selection theorem. This holds in any topological vector space over ℝ.
+- `LowerHemicontinuous.exists_continuous_selection`: Michael's selection theorem that a lower
+  hemicontinous function from a paracompact space to a Banach space which takes convex, closed,
+  nonempty values admits a continuous selection.
 
 ## TODO
 
-This file proves the classical Michael selection theorem, but this can be generalized to a
-targets that are complete topological vector spaces
+The `NormedSpace` assumption on `LowerHemicontinuous.exists_continuous_selection` can be weakened
+to a complete metrizable locally convex topological vector space.
 -/
 
 public section
@@ -36,13 +37,15 @@ public section
 open Set Metric
 
 variable {α β : Type*} {f : α → Set β} {g : α → β}
-
 variable [TopologicalSpace α] [NormalSpace α] [ParacompactSpace α]
-  [NormedAddCommGroup β] [NormedSpace ℝ β]
-  {f : α → Set β}
 
-/-- A correspondence with open lower sections and convex, nonempty values admits a
-continuous selection -/
+section
+
+variable [AddCommGroup β] [Module ℝ β] [TopologicalSpace β] [ContinuousAdd β]
+  [ContinuousSMul ℝ β] {f : α → Set β}
+
+/-- A correspondence with open lower sections and convex, nonempty values admits a continuous
+selection. This holds in any topological vector space over ℝ. -/
 lemma HasOpenLowerSections.exists_continuous_selection (hf : HasOpenLowerSections f)
     (hf_nonempty : ∀ x, (f x).Nonempty) (hf_convex : ∀ x, Convex ℝ (f x)) :
     ∃ h : α → β, Continuous h ∧ ∀ x, h x ∈ f x := by
@@ -54,7 +57,11 @@ lemma HasOpenLowerSections.exists_continuous_selection (hf : HasOpenLowerSection
     (hf_convex y).finsum_mem (fun i ↦ φ.nonneg i y) (φ.sum_eq_one (mem_univ y)) fun x' hx' ↦
       hφ x' (subset_tsupport _ hx')⟩
 
-variable [CompleteSpace β]
+end
+
+section
+
+variable [NormedAddCommGroup β] [NormedSpace ℝ β] [CompleteSpace β] {f : α → Set β}
 
 /-- **Michael's selection theorem**: A lower hemicontinuous function from a paracompact Hausdorff
 space (which is necessarily normal) to a Banach space with nonempty convex closed values
@@ -75,7 +82,8 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
       let ε := (2 : ℝ)⁻¹ ^ (n + 1)
       have hε : 0 < ε := by positivity
       have : HasOpenLowerSections (fun x ↦ Metric.thickening ε (f x) ∩ ball (hn x) ε) :=
-        (hf.hasOpenLowerSections_thickening ε).inter (hn_prop.1.hasOpenLowerSections_ball ε)
+        HasOpenLowerSections.inter (hf.hasOpenLowerSections_thickening ε)
+          (hn_prop.1.hasOpenLowerSections_ball ε)
       obtain ⟨h', hh'_cont, hh'_mem⟩ := this.exists_continuous_selection
         (fun x ↦ by
           obtain ⟨z, hz_mem, hz_dist⟩ := mem_thickening_iff.mp (hn_prop.2 x)
@@ -125,5 +133,7 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
       (fun n ↦ (hinfDist n).le)
       (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num))
   exact (hf_isClosed x).mem_iff_infDist_zero (hf_nonempty x) |>.mpr h0
+
+end
 
 end
