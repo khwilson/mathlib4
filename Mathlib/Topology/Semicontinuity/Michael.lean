@@ -56,6 +56,9 @@ lemma HasOpenLowerSections.exists_continuous_selection (hf : HasOpenLowerSection
 
 variable [CompleteSpace β]
 
+/-- **Michael's selection theorem**: A lower hemicontinuous function from a paracompact Hausdorff
+space (which is necessarily normal) to a Banach space with nonempty convex closed values
+admits a continuous selection -/
 theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuous f)
     (hf_nonempty : ∀ x, (f x).Nonempty) (hf_convex : ∀ x, Convex ℝ (f x))
     (hf_isClosed : ∀ x, IsClosed (f x)) : ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
