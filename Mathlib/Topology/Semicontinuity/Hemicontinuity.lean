@@ -335,3 +335,34 @@ lemma UpperHemicontinuousAt.mem_of_tendsto {α β ι : Type*} [TopologicalSpace 
   filter_upwards [hx (hf s hs)] with n hn hyn
   simp only [← subset_interior_iff_mem_nhdsSet, preimage_setOf_eq, mem_setOf_eq] at hn
   exact interior_subset <| hn hyn
+
+/-! ### Open lower sections -/
+
+/-- A correspondence `f : α → Set β` has open lower sections if and only if its *lower inverse*
+(i.e., `b : β ↦ (f ⁻¹' (Iic {b}ᶜ))ᶜ = {x | b ∈ f x}`) sends every point to an open set. -/
+lemma hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl :
+    HasOpenLowerSections f ↔ ∀ b, IsOpen (f ⁻¹' (Iic {b}ᶜ))ᶜ := by
+  have h (b : β) : (f ⁻¹' (Iic {b}ᶜ))ᶜ = {x | b ∈ f x} := by
+    simp [Set.ext_iff, Iic, Set.mem_compl_iff]
+  simp_rw [h, hasOpenLowerSections_iff_isOpen]
+
+/-- A correspondence `f : α → Set β` has open lower sections if and only if its *upper inverse*
+(i.e., `b : β ↦ f ⁻¹' (Iic {b}ᶜ) = {x | b ∉ f x}`) sends every point to a closed set. -/
+lemma hasOpenLowerSections_iff_isClosed_preimage_Iic :
+    HasOpenLowerSections f ↔ ∀ b, IsClosed (f ⁻¹' (Iic {b}ᶜ)) := by
+  simp_rw [← isOpen_compl_iff]
+  exact hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl
+
+/-- A correspondence with open lower sections is lower hemicontinuous: if every section
+`{x | b ∈ f x}` is open, then for every open `u`, the set `{x | f x ∩ u ≠ ∅}` is open
+as a union over `b ∈ u` of the open sections. -/
+lemma HasOpenLowerSections.lowerHemicontinuous (hf : HasOpenLowerSections f) :
+    LowerHemicontinuous f := by
+  rw [lowerHemicontinuous_iff_isOpen_compl_preimage_Iic_compl]
+  intro u _hu
+  have h1 : (f ⁻¹' (Iic uᶜ))ᶜ = {x | (f x ∩ u).Nonempty} := by
+    simp [Set.ext_iff, Iic, Set.mem_compl_iff, Set.not_subset, Set.Nonempty]
+  have h2 : {x | (f x ∩ u).Nonempty} = ⋃ b ∈ u, {x | b ∈ f x} := by
+    ext x; simp [Set.Nonempty, Set.mem_inter_iff, and_comm]
+  rw [h1, h2]
+  exact isOpen_biUnion fun b _ ↦ hasOpenLowerSections_iff_isOpen.mp hf b

@@ -900,3 +900,156 @@ theorem UpperHemicontinuous.comp
 end
 
 end Hemi
+
+section Sections
+
+/-! ## Open lower sections -/
+
+/-! ### Definitions -/
+
+/-- A function `f : α → Set β` has open lower sections within `s` at `x` if, whenever `b ∈ f x`,
+then `b ∈ f x'` for all `x'` sufficiently close to `x` within `s`. Equivalently, the section
+`{x | b ∈ f x}` is open for every `b`. -/
+abbrev HasOpenLowerSectionsWithinAt (f : α → Set β) (s : Set α) (x : α) :=
+  SemicontinuousWithinAt (fun x b ↦ b ∈ f x) s x
+
+/-- A function `f : α → Set β` has open lower sections on `s` if it has open lower sections within
+`s` at every `x ∈ s`. -/
+abbrev HasOpenLowerSectionsOn (f : α → Set β) (s : Set α) :=
+  SemicontinuousOn (fun x b ↦ b ∈ f x) s
+
+/-- A function `f : α → Set β` has open lower sections at `x` if, whenever `b ∈ f x`, then
+`b ∈ f x'` for all `x'` sufficiently close to `x`. -/
+abbrev HasOpenLowerSectionsAt (f : α → Set β) (x : α) :=
+  SemicontinuousAt (fun x b ↦ b ∈ f x) x
+
+/-- A function `f : α → Set β` has open lower sections if, for every `b`, the set `{x | b ∈ f x}`
+is open. Equivalently, whenever `b ∈ f x`, then `b ∈ f x'` for all `x'` sufficiently close to
+`x`. -/
+abbrev HasOpenLowerSections (f : α → Set β) :=
+  Semicontinuous (fun x b ↦ b ∈ f x)
+
+variable {f g : α → Set β} {x : α} {s t : Set α} {z : Set β}
+
+/-! ### Iff lemmas -/
+
+lemma hasOpenLowerSectionsWithinAt_iff :
+    HasOpenLowerSectionsWithinAt f s x ↔ ∀ b, b ∈ f x → ∀ᶠ x' in 𝓝[s] x, b ∈ f x' :=
+  Iff.rfl
+
+lemma hasOpenLowerSectionsOn_iff :
+    HasOpenLowerSectionsOn f s ↔ ∀ x ∈ s, HasOpenLowerSectionsWithinAt f s x :=
+  Iff.rfl
+
+lemma hasOpenLowerSectionsAt_iff :
+    HasOpenLowerSectionsAt f x ↔ ∀ b, b ∈ f x → ∀ᶠ x' in 𝓝 x, b ∈ f x' :=
+  Iff.rfl
+
+lemma hasOpenLowerSections_iff :
+    HasOpenLowerSections f ↔ ∀ x, HasOpenLowerSectionsAt f x :=
+  Iff.rfl
+
+lemma HasOpenLowerSections.isOpen (hf : HasOpenLowerSections f) : ∀ b, IsOpen {x | b ∈ f x} :=
+  fun b ↦ by simpa [isOpen_iff_mem_nhds] using fun x hx ↦ hf x b hx
+
+/-- A function has open lower sections iff every section `{x | b ∈ f x}` is open. -/
+lemma hasOpenLowerSections_iff_isOpen :
+    HasOpenLowerSections f ↔ ∀ b, IsOpen {x | b ∈ f x} := by
+  refine ⟨fun hf ↦ hf.isOpen, ?_⟩
+  intro h x b hbx
+  exact (h b).mem_nhds hbx
+
+/-! ### Basic dot notation interface -/
+
+theorem HasOpenLowerSectionsWithinAt.mono (h : HasOpenLowerSectionsWithinAt f s x) (hst : t ⊆ s) :
+    HasOpenLowerSectionsWithinAt f t x :=
+  SemicontinuousWithinAt.mono h hst
+
+theorem HasOpenLowerSectionsWithinAt.congr_of_eventuallyEq {a : α}
+    (h : HasOpenLowerSectionsWithinAt f s a)
+    (has : a ∈ s) (hfg : f =ᶠ[𝓝[s] a] g) :
+    HasOpenLowerSectionsWithinAt g s a :=
+  SemicontinuousWithinAt.congr_of_eventuallyEq h has <| by
+    filter_upwards [hfg] with x hx
+    simp [hx]
+
+theorem hasOpenLowerSectionsWithinAt_univ_iff :
+    HasOpenLowerSectionsWithinAt f univ x ↔ HasOpenLowerSectionsAt f x :=
+  semicontinuousWithinAt_univ_iff
+
+theorem HasOpenLowerSectionsAt.hasOpenLowerSectionsWithinAt (s : Set α)
+    (h : HasOpenLowerSectionsAt f x) : HasOpenLowerSectionsWithinAt f s x :=
+  h.semicontinuousWithinAt s
+
+theorem HasOpenLowerSectionsOn.hasOpenLowerSectionsWithinAt (h : HasOpenLowerSectionsOn f s)
+    (hx : x ∈ s) : HasOpenLowerSectionsWithinAt f s x :=
+  h.semicontinuousWithinAt hx
+
+theorem HasOpenLowerSectionsOn.mono (h : HasOpenLowerSectionsOn f s) (hst : t ⊆ s) :
+    HasOpenLowerSectionsOn f t :=
+  SemicontinuousOn.mono h hst
+
+theorem hasOpenLowerSectionsOn_univ_iff :
+    HasOpenLowerSectionsOn f univ ↔ HasOpenLowerSections f :=
+  semicontinuousOn_univ_iff
+
+@[simp] theorem hasOpenLowerSections_restrict_iff :
+    HasOpenLowerSections (s.restrict f) ↔ HasOpenLowerSectionsOn f s :=
+  semicontinuous_restrict_iff (r := (fun x b ↦ b ∈ f x))
+
+theorem HasOpenLowerSections.hasOpenLowerSectionsAt (h : HasOpenLowerSections f) (x : α) :
+    HasOpenLowerSectionsAt f x :=
+  h x
+
+theorem HasOpenLowerSections.hasOpenLowerSectionsWithinAt (h : HasOpenLowerSections f) (s : Set α)
+    (x : α) : HasOpenLowerSectionsWithinAt f s x :=
+  (h x).semicontinuousWithinAt s
+
+theorem HasOpenLowerSections.hasOpenLowerSectionsOn (h : HasOpenLowerSections f) (s : Set α) :
+    HasOpenLowerSectionsOn f s :=
+  h.semicontinuousOn s
+
+/-! ### Constants -/
+
+theorem HasOpenLowerSectionsWithinAt.const : HasOpenLowerSectionsWithinAt (fun _x => z) s x :=
+  SemicontinuousWithinAt.const
+
+theorem HasOpenLowerSectionsAt.const : HasOpenLowerSectionsAt (fun _x => z) x :=
+  SemicontinuousAt.const
+
+theorem HasOpenLowerSectionsOn.const : HasOpenLowerSectionsOn (fun _x => z) s :=
+  SemicontinuousOn.const
+
+theorem HasOpenLowerSections.const : HasOpenLowerSections fun _x : α => z :=
+  Semicontinuous.const
+
+/-! ### Composition -/
+
+section
+
+variable {γ : Type*} [TopologicalSpace γ] {g : γ → α} {c : γ} {t : Set γ}
+
+theorem HasOpenLowerSectionsWithinAt.comp
+    (hf : HasOpenLowerSectionsWithinAt f s (g c)) (hg : ContinuousWithinAt g t c)
+    (hg' : MapsTo g t s) :
+    HasOpenLowerSectionsWithinAt (f ∘ g) t c :=
+  -- the elaboration aid is necessary.
+  SemicontinuousWithinAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+
+theorem HasOpenLowerSectionsAt.comp
+    (hf : HasOpenLowerSectionsAt f (g c)) (hg : ContinuousAt g c) :
+    HasOpenLowerSectionsAt (f ∘ g) c :=
+  SemicontinuousAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+
+theorem HasOpenLowerSectionsOn.comp
+    (hf : HasOpenLowerSectionsOn f s) (hg : ContinuousOn g t) (hg' : MapsTo g t s) :
+    HasOpenLowerSectionsOn (f ∘ g) t :=
+  SemicontinuousOn.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+
+theorem HasOpenLowerSections.comp
+    (hf : HasOpenLowerSections f) (hg : Continuous g) : HasOpenLowerSections (f ∘ g) :=
+  Semicontinuous.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+
+end
+
+end Sections
