@@ -1023,6 +1023,13 @@ theorem HasOpenLowerSectionsOn.const : HasOpenLowerSectionsOn (fun _x => z) s :=
 theorem HasOpenLowerSections.const : HasOpenLowerSections fun _x : α => z :=
   Semicontinuous.const
 
+/-! ### Intersection -/
+
+theorem HasOpenLowerSections.inter {f g : α → Set β} (hf : HasOpenLowerSections f)
+    (hg : HasOpenLowerSections g) : HasOpenLowerSections (fun x ↦ f x ∩ g x) := by
+  rw [hasOpenLowerSections_iff_isOpen]
+  exact fun b ↦ by simpa using (hf.isOpen b).inter (hg.isOpen b)
+
 /-! ### Composition -/
 
 section

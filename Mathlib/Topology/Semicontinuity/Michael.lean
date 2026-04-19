@@ -5,18 +5,10 @@ Authors: Kevin H. Wilson
 -/
 module
 
-public import Mathlib.Topology.Semicontinuity.Hemicontinuity
-public import Mathlib.Topology.Compactness.Paracompact
-public import Mathlib.Analysis.Normed.Module.Basic
-public import Mathlib.Analysis.Convex.Basic
-public import Mathlib.Topology.PartitionOfUnity
-public import Mathlib.Topology.Algebra.InfiniteSum.Basic
-public import Mathlib.Algebra.FiniteSupport.Basic
-public import Mathlib.Topology.UniformSpace.UniformApproximation
-public import Mathlib.Topology.MetricSpace.HausdorffDistance
-public import Mathlib.Topology.MetricSpace.Thickening
 public import Mathlib.Analysis.Normed.Module.Convex
+public import Mathlib.Topology.Semicontinuity.Hemicontinuity
 public import Mathlib.Topology.Semicontinuity.Metric
+public import Mathlib.Topology.PartitionOfUnity
 
 /-!
 # Michael's selection theorem
@@ -30,8 +22,13 @@ convex closed nonempty values admits a continuous selection.
   convex, nonempty values admits a continuous selection. A key ingredient to the proof of Michael's
   selction theorem
 - `LowerHemicontinuous.approx_of_convex_closed_nonempty`: Michael's selection theorem that a
-  lower hemicontinous function from a paracompact space to a separable Banach space which takes
+  lower hemicontinous function from a paracompact space to a Banach space which takes
   convex, closed, nonempty values admits a continuous selection
+
+## TODO
+
+This file proves the classical Michael selection theorem, but this can be generalized to a
+targets that are complete topological vector spaces
 -/
 
 public section
@@ -62,7 +59,7 @@ variable [CompleteSpace β]
 theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuous f)
     (hf_nonempty : ∀ x, (f x).Nonempty) (hf_convex : ∀ x, Convex ℝ (f x))
     (hf_isClosed : ∀ x, IsClosed (f x)) : ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
-  obtain ⟨g, hg_cont, hg_mem⟩ := (hf.thickening_hasOpenLowerSections 1).exists_continuous_selection
+  obtain ⟨g, hg_cont, hg_mem⟩ := (hf.hasOpenLowerSections_thickening 1).exists_continuous_selection
     (by simp [hf_nonempty]) (fun x ↦ (hf_convex x).thickening 1)
   obtain ⟨h, hh_cont, hh_mem, hh_mem_ball⟩ : ∃ h : ℕ → α → β, (∀ n, Continuous (h n)) ∧
       (∀ n x, h n x ∈ Metric.thickening ((2 : ℝ)⁻¹ ^ n) (f x)) ∧
@@ -75,9 +72,7 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
       let ε := (2 : ℝ)⁻¹ ^ (n + 1)
       have hε : 0 < ε := by positivity
       have : HasOpenLowerSections (fun x ↦ Metric.thickening ε (f x) ∩ ball (hn x) ε) :=
-        hasOpenLowerSections_iff_isOpen.mpr fun b ↦ by
-          simpa [dist_comm b] using ((hf.thickening_hasOpenLowerSections _).isOpen _).inter <|
-            hn_prop.1.isOpen_preimage _ isOpen_ball
+        (hf.hasOpenLowerSections_thickening ε).inter (hn_prop.1.hasOpenLowerSections_ball ε)
       obtain ⟨h', hh'_cont, hh'_mem⟩ := this.exists_continuous_selection
         (fun x ↦ by
           obtain ⟨z, hz_mem, hz_dist⟩ := mem_thickening_iff.mp (hn_prop.2 x)
