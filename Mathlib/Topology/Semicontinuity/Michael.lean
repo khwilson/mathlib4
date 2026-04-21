@@ -114,26 +114,24 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
       (by norm_num)).eventually (gt_mem_nhds hε)).exists
     filter_upwards [Filter.eventually_ge_atTop n] with m hm x
     rw [dist_comm]
-    have hu : ∀ k, dist (h k x) (h (k + 1) x) ≤ (2 : ℝ)⁻¹ * (2 : ℝ)⁻¹ ^ k := fun k ↦ by
-      rw [dist_comm]; exact (hh_mem_ball k x).le.trans_eq (by ring)
     calc dist (h m x) (H x)
-        ≤ (2 : ℝ)⁻¹ * (2 : ℝ)⁻¹ ^ m / (1 - (2 : ℝ)⁻¹) :=
-          dist_le_of_le_geometric_of_tendsto (2 : ℝ)⁻¹ (2 : ℝ)⁻¹ (by norm_num) hu (hH x) m
+        ≤ (2 : ℝ)⁻¹ * (2 : ℝ)⁻¹ ^ m / (1 - (2 : ℝ)⁻¹) := by
+          refine dist_le_of_le_geometric_of_tendsto (2 : ℝ)⁻¹ (2 : ℝ)⁻¹ (by norm_num) ?_ (hH x) m
+          intro k
+          rw [dist_comm]; exact (hh_mem_ball k x).le.trans_eq (by ring)
       _ = (2 : ℝ)⁻¹ ^ m := by field_simp; ring
       _ ≤ (2 : ℝ)⁻¹ ^ n := pow_le_pow_of_le_one (by norm_num) (by norm_num) hm
       _ < ε := hn
   refine ⟨H, unif.continuous (Filter.Frequently.of_forall fun n ↦ hh_cont n), fun x ↦ ?_⟩
+  apply (hf_isClosed x).mem_iff_infDist_zero (hf_nonempty x) |>.mpr
   have hinfDist : ∀ n, infDist (h n x) (f x) < (2 : ℝ)⁻¹ ^ n := fun n ↦ by
     simpa [← Metric.mem_thickening_iff_infDist_lt (hf_nonempty x)] using hh_mem n x
   have hconv : Filter.Tendsto (fun n ↦ infDist (h n x) (f x)) Filter.atTop
       (nhds (infDist (H x) (f x))) :=
     ((continuous_infDist_pt (f x)).tendsto (H x)).comp (hH x)
-  have h0 : infDist (H x) (f x) = 0 :=
-    tendsto_nhds_unique hconv <| squeeze_zero (fun _ ↦ infDist_nonneg)
+  exact tendsto_nhds_unique hconv <| squeeze_zero (fun _ ↦ infDist_nonneg)
       (fun n ↦ (hinfDist n).le)
       (tendsto_pow_atTop_nhds_zero_of_lt_one (by norm_num) (by norm_num))
-  exact (hf_isClosed x).mem_iff_infDist_zero (hf_nonempty x) |>.mpr h0
-
 end
 
 end
