@@ -42,6 +42,7 @@ lemma Continuous.lowerHemicontinuous_ball {f : α → β} (hf : Continuous f) (�
 
 lemma Continuous.upperHemicontinuous_closedBall {f : α → β} (hf : Continuous f) (ε : ℝ) :
   UpperHemicontinuous (fun x ↦ Metric.closedBall (f x) ε) := by
+
   rw [upperHemicontinuous_iff_isClosed_compl_preimage_Iic_compl]
   intro u _hu
   have hfcomp : ((fun x ↦ closedBall (f x) ε) ⁻¹' (Iic uᶜ))ᶜ =
@@ -49,8 +50,14 @@ lemma Continuous.upperHemicontinuous_closedBall {f : α → β} (hf : Continuous
     simp [Set.ext_iff, Iic, Set.mem_compl_iff, Set.not_subset, Set.Nonempty]
   have heq : {x | (closedBall (f x) ε ∩ u).Nonempty} = f ⁻¹' cthickening ε u := by
     ext x
-    simp only [mem_setOf, mem_preimage, mem_cthickening_iff, Set.Nonempty]
-    sorry
+    simp only [mem_setOf, mem_preimage, mem_cthickening_iff, Set.Nonempty, infEDist, edist_dist]
+    simp_rw [dist_comm]
+    constructor
+    · intro ⟨z, hz, hzu⟩
+      apply iInf₂_le_of_le z hzu
+      gcongr
+      exact hz
+    · sorry
   simpa [hfcomp, heq] using isClosed_cthickening.preimage hf
 
 lemma Continuous.hasOpenLowerSections_ball {f : α → β} (hf : Continuous f) (ε : ℝ) :
