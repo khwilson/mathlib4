@@ -180,10 +180,12 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
         ∃ h', P (n + 1) h' ∧ ∀ x, (h' x) - (hn x) ∈ V (n + 1) := by
       intro n hn hn_prop
       have : HasOpenLowerSections (fun x ↦ (f x + V (n + 1)) ∩ ({hn x} + V (n + 1))) :=
-        HasOpenLowerSections.inter (hf.hasOpenLowerSections_add_isOpen (V := V (n + 1)) (hV _))
-          (hn_prop.1.lowerHemicontinuous.hasOpenLowerSections_add_isOpen (V := V (n + 1)) (hV _))
+        HasOpenLowerSections.inter
+          (hf.hasOpenLowerSections_add_isOpen (V := V (n + 1)) (hV _).2.1)
+          (hn_prop.1.lowerHemicontinuous.hasOpenLowerSections_add_isOpen
+            (V := V (n + 1)) (hV _).2.1)
       obtain ⟨h', hh'_cont, hh'_mem⟩ := this.exists_continuous_selection sorry
-        fun x ↦ ((hf_convex _).add (hV _).2.2.1).inter <| (convex_singleton _).add (hV_convex _)
+        fun x ↦ ((hf_convex _).add (hV _).2.2.1).inter <| (convex_singleton _).add (hV _).2.2.1
       use h'
       constructor
       · constructor
@@ -204,6 +206,7 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
     | zero => simp [h, hg_cont, hg_mem, hF, P]
     | succ n ih => simp [h, ih, P, hF]
   have hBlah : ∀ n, ∀ i, n ≤ i → ∀ j, n ≤ j → ∀ x, h i x - h j x ∈ V n := by sorry
+  have hV' : ∀ u ∈ 𝓝 (0 : β), ∃ n, V n ⊆ u := sorry
   have hFoo : UniformCauchySeqOn h Filter.atTop univ := by
     rw [IsTopologicalAddGroup.uniformCauchySeqOn_iff]
     intro u hu
