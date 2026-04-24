@@ -118,14 +118,6 @@ lemma Continuous.upperHemicontinuous_closedBall {f : α → β} (hf : Continuous
     · sorry
   simpa [hfcomp, heq] using isClosed_cthickening.preimage hf
 
-lemma Continuous.hasOpenLowerSections_ball {f : α → β} (hf : Continuous f) (ε : ℝ) :
-    HasOpenLowerSections (fun x ↦ Metric.ball (f x) ε) := by
-  rw [hasOpenLowerSections_iff_isOpen]
-  intro b
-  have : {x | b ∈ ball (f x) ε} = f ⁻¹' ball b ε := by
-    ext; simp [dist_comm]
-  exact this ▸ isOpen_ball.preimage hf
-
 lemma LowerHemicontinuous.thickening {f : α → Set β} (hf : LowerHemicontinuous f) (ε : ℝ) :
   LowerHemicontinuous (fun x ↦ Metric.thickening ε (f x)) :=
   (hf.hasOpenLowerSections_thickening ε).lowerHemicontinuous
