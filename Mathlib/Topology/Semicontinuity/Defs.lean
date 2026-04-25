@@ -1088,7 +1088,7 @@ def HasOpenCGraph (f : α → Set β) :=
 
 /-! ### Iff lemmas -/
 
-variable {f : α → Set β} {s : Set (α × β)} {x : α × β}
+variable {f : α → Set β} {s : Set (α × β)} {x : α × β} {z : Set β}
 
 lemma hasOpenCGraphWithinAt_iff :
     HasOpenCGraphWithinAt f s x ↔ (x.2 ∈ f x.1 → ∀ᶠ x' in 𝓝[s] x, x'.2 ∈ f x'.1) :=
@@ -1158,55 +1158,65 @@ theorem HasOpenCGraph.hasOpenCGraphOn (h : HasOpenCGraph f) (s : Set (α × β))
     HasOpenCGraphOn f s :=
   h.continuousOn
 
-
 /-! ### Constants -/
 
-theorem HasOpenLowerSectionsWithinAt.const : HasOpenLowerSectionsWithinAt (fun _x => z) s x :=
-  SemicontinuousWithinAt.const
+theorem HasOpenCGraph.const (hz : IsOpen z) : HasOpenCGraph (fun _x : α => z) :=
+  (continuous_Prop.mpr hz).comp continuous_snd
 
-theorem HasOpenLowerSectionsAt.const : HasOpenLowerSectionsAt (fun _x => z) x :=
-  SemicontinuousAt.const
+theorem HasOpenCGraphWithinAt.const (hz : IsOpen z) :
+    HasOpenCGraphWithinAt (fun _x : α => z) s x :=
+  (HasOpenCGraph.const hz).continuousWithinAt
 
-theorem HasOpenLowerSectionsOn.const : HasOpenLowerSectionsOn (fun _x => z) s :=
-  SemicontinuousOn.const
+theorem HasOpenCGraphAt.const (hz : IsOpen z) : HasOpenCGraphAt (fun _x : α => z) x :=
+  (HasOpenCGraph.const hz).continuousAt
 
-theorem HasOpenLowerSections.const : HasOpenLowerSections fun _x : α => z :=
-  Semicontinuous.const
+theorem HasOpenCGraphOn.const (hz : IsOpen z) : HasOpenCGraphOn (fun _x : α => z) s :=
+  (HasOpenCGraph.const hz).continuousOn
 
 /-! ### Intersection -/
 
-theorem HasOpenLowerSections.inter {f g : α → Set β} (hf : HasOpenLowerSections f)
-    (hg : HasOpenLowerSections g) : HasOpenLowerSections (fun x ↦ f x ∩ g x) := by
-  rw [hasOpenLowerSections_iff_isOpen]
-  exact fun b ↦ by simpa using (hf.isOpen b).inter (hg.isOpen b)
+theorem HasOpenCGraph.inter {f g : α → Set β} (hf : HasOpenCGraph f)
+    (hg : HasOpenCGraph g) : HasOpenCGraph (fun x ↦ f x ∩ g x) := by
+  rw [hasOpenCGraph_iff_isOpen]
+  have : {x : α × β | x.2 ∈ f x.1 ∩ g x.1} =
+      {x | x.2 ∈ f x.1} ∩ {x | x.2 ∈ g x.1} := by ext; simp
+  rw [this]
+  exact hf.isOpen.inter hg.isOpen
 
 /-! ### Composition -/
 
 section
 
-variable {γ : Type*} [TopologicalSpace γ] {g : γ → α} {c : γ} {t : Set γ}
+variable {γ : Type*} [TopologicalSpace γ] {g' : γ → α} {c : γ × β}
+    {u : Set (γ × β)} {v : Set (α × β)}
 
-theorem HasOpenLowerSectionsWithinAt.comp
-    (hf : HasOpenLowerSectionsWithinAt f s (g c)) (hg : ContinuousWithinAt g t c)
-    (hg' : MapsTo g t s) :
-    HasOpenLowerSectionsWithinAt (f ∘ g) t c :=
-  -- the elaboration aid is necessary.
-  SemicontinuousWithinAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+theorem HasOpenCGraphWithinAt.comp
+    (hf : HasOpenCGraphWithinAt f v (Prod.map g' id c))
+    (hg : ContinuousWithinAt (Prod.map g' id) u c)
+    (hgt : MapsTo (Prod.map g' id) u v) :
+    HasOpenCGraphWithinAt (f ∘ g') u c :=
+  ContinuousWithinAt.comp hf hg hgt
 
-theorem HasOpenLowerSectionsAt.comp
-    (hf : HasOpenLowerSectionsAt f (g c)) (hg : ContinuousAt g c) :
-    HasOpenLowerSectionsAt (f ∘ g) c :=
-  SemicontinuousAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+theorem HasOpenCGraphAt.comp
+    (hf : HasOpenCGraphAt f (Prod.map g' id c))
+    (hg : ContinuousAt (Prod.map g' id) c) :
+    HasOpenCGraphAt (f ∘ g') c :=
+  ContinuousAt.comp hf hg
 
-theorem HasOpenLowerSectionsOn.comp
-    (hf : HasOpenLowerSectionsOn f s) (hg : ContinuousOn g t) (hg' : MapsTo g t s) :
-    HasOpenLowerSectionsOn (f ∘ g) t :=
-  SemicontinuousOn.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+theorem HasOpenCGraphOn.comp (hf : HasOpenCGraphOn f v) (hg : ContinuousOn (Prod.map g' id) u)
+    (hgt : MapsTo (Prod.map g' id) u v) : HasOpenCGraphOn (f ∘ g') u :=
+  ContinuousOn.comp hf hg hgt
 
-theorem HasOpenLowerSections.comp
-    (hf : HasOpenLowerSections f) (hg : Continuous g) : HasOpenLowerSections (f ∘ g) :=
-  Semicontinuous.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+theorem HasOpenCGraph.comp (hf : HasOpenCGraph f) (hg : Continuous g') :
+    HasOpenCGraph (f ∘ g') :=
+  Continuous.comp hf (hg.prodMap continuous_id)
 
 end
+
+/-! ### Open graphs imply open lower sections -/
+
+theorem HasOpenCGraph.hasOpenLowerSections (hf : HasOpenCGraph f) :
+    HasOpenLowerSections f := by
+  sorry
 
 end Graph
