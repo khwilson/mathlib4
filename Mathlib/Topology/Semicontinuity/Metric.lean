@@ -55,6 +55,58 @@ open scoped Pointwise
 
 variable [AddCommGroup β] [TopologicalSpace β] [ContinuousSub β]
 
+theorem LowerHemicontinuous.hasOpenGraph_add_isOpen {f : α → Set β}
+    (hf : LowerHemicontinuous f) {V : Set β} (hV : IsOpen V) :
+    IsOpen {x : α × β | x.2 ∈ (fun x ↦ f x + V) x.1} := by
+  -- A set is open if it's a neighborhood of all its points
+  rw [isOpen_iff_forall_mem_open]
+  rintro ⟨x, y⟩ hxy
+  change y ∈ f x + V at hxy
+
+  -- By definition of set addition, y = z + v
+  rw [Set.mem_add] at hxy
+  obtain ⟨z, hz, v, hv, rfl⟩ := hxy
+
+  -- The preimage of V under subtraction is an open set
+  have h_pre_open : IsOpen ((fun p : β × β ↦ p.1 - p.2) ⁻¹' V) :=
+    continuous_sub.isOpen_preimage _ hV
+
+  -- The point (z + v, z) is in this preimage because (z + v) - z = v ∈ V
+  have h_mem_pre : (z + v, z) ∈ (fun p : β × β ↦ p.1 - p.2) ⁻¹' V := by
+    change (z + v) - z ∈ V
+    have h_eq : z + v - z = v := by abel
+    rw [h_eq]
+    exact hv
+
+  -- Because the preimage is open in the product space, there exist basic open sets around the point
+  rw [isOpen_prod_iff] at h_pre_open
+  obtain ⟨O, U, hO_open, hU_open, hz_v_O, hz_U, hOU⟩ :=
+    h_pre_open (z + v) z h_mem_pre
+
+  -- Apply lower hemicontinuity to get an open neighborhood in α
+  rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at hf
+  have hU_alpha : IsOpen {x' | (f x' ∩ U).Nonempty} := hf U hU_open
+  have hx_mem : x ∈ {x' | (f x' ∩ U).Nonempty} := ⟨z, hz, hz_U⟩
+
+  -- The product of these sets is an open neighborhood in α × β
+  have h_prod_open : IsOpen ({x' | (f x' ∩ U).Nonempty} ×ˢ O) :=
+    hU_alpha.prod hO_open
+
+  -- Provide this open neighborhood to satisfy the goal
+  refine ⟨_, ?_, h_prod_open, ⟨hx_mem, hz_v_O⟩⟩
+  rintro ⟨x', y'⟩ ⟨hx', hy'⟩
+  change y' ∈ f x' + V
+
+  obtain ⟨z', hz'_f, hz'_U⟩ := hx'
+
+  -- Since y' ∈ O and z' ∈ U, their difference lands in V
+  have h_sub : y' - z' ∈ V := hOU (mk_mem_prod hy' hz'_U)
+
+  -- Thus y' = z' + (y' - z') which means it is in f x' + V
+  rw [Set.mem_add]
+  exact ⟨z', hz'_f, y' - z', h_sub, by abel⟩
+
+
 lemma LowerHemicontinuous.hasOpenLowerSections_add_isOpen {f : α → Set β}
     (hf : LowerHemicontinuous f) {V : Set β} (hV : IsOpen V) :
     HasOpenLowerSections (fun x ↦ f x + V) := by
@@ -78,6 +130,11 @@ lemma LowerHemicontinuous.hasOpenLowerSections_add_isOpen {f : α → Set β}
   rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at hf
   exact hf U hU
 
+lemma LowerHemicontinuous.inter_hasOpenGraph {f g : α → Set β}
+    (hf : LowerHemicontinuous f) (hg : IsOpen {x : α × β | x.2 ∈ g x.1}) :
+    LowerHemicontinuous (fun x ↦ f x ∩ g x) := by
+  rw [lowerHemicontinuous_iff_isOpen_inter_nonempty]
+  sorry
 end topologicalVectorSpace
 
 section metric
@@ -98,32 +155,9 @@ lemma Continuous.hasOpenLowerSections_ball {f : α → β} (hf : Continuous f) (
   have : (fun x ↦ thickening ε {f x}) = fun x ↦ ball (f x) ε := by ext; simp
   simpa [← this] using hf.lowerHemicontinuous.hasOpenLowerSections_thickening ε
 
-lemma Continuous.upperHemicontinuous_closedBall {f : α → β} (hf : Continuous f) (ε : ℝ) :
-  UpperHemicontinuous (fun x ↦ Metric.closedBall (f x) ε) := by
-
-  rw [upperHemicontinuous_iff_isClosed_compl_preimage_Iic_compl]
-  intro u _hu
-  have hfcomp : ((fun x ↦ closedBall (f x) ε) ⁻¹' (Iic uᶜ))ᶜ =
-      {x | (closedBall (f x) ε ∩ u).Nonempty} := by
-    simp [Set.ext_iff, Iic, Set.mem_compl_iff, Set.not_subset, Set.Nonempty]
-  have heq : {x | (closedBall (f x) ε ∩ u).Nonempty} = f ⁻¹' cthickening ε u := by
-    ext x
-    simp only [mem_setOf, mem_preimage, mem_cthickening_iff, Set.Nonempty, infEDist, edist_dist]
-    simp_rw [dist_comm]
-    constructor
-    · intro ⟨z, hz, hzu⟩
-      apply iInf₂_le_of_le z hzu
-      gcongr
-      exact hz
-    · sorry
-  simpa [hfcomp, heq] using isClosed_cthickening.preimage hf
-
 lemma LowerHemicontinuous.thickening {f : α → Set β} (hf : LowerHemicontinuous f) (ε : ℝ) :
   LowerHemicontinuous (fun x ↦ Metric.thickening ε (f x)) :=
   (hf.hasOpenLowerSections_thickening ε).lowerHemicontinuous
-
-lemma UpperHemicontinuous.cthickening {f : α → Set β} (hf : UpperHemicontinuous f) (ε : ℝ) :
-  UpperHemicontinuous (fun x ↦ Metric.cthickening ε (f x)) := sorry
 
 end metric
 

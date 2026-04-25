@@ -158,74 +158,80 @@ section
 
 variable [NormedAddCommGroup β] [NormedSpace ℝ β] [CompleteSpace β] {f : α → Set β}
 
-open Pointwise Topology in
-/-- **Michael's selection theorem**: A lower hemicontinuous function from a paracompact Hausdorff
-space (which is necessarily normal) to a Banach space with nonempty convex closed values
-admits a continuous selection -/
-theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuous f)
-    (hf_nonempty : ∀ x, (f x).Nonempty) (hf_convex : ∀ x, Convex ℝ (f x))
-    (hf_isClosed : ∀ x, IsClosed (f x)) : ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
-  -- This proof is written to be compatible with a proof for Frechet spaces
-  haveI : LocallyConvexSpace ℝ β := by sorry
-  obtain ⟨V, hV⟩ := bar ℝ β
-  obtain ⟨g, hg_cont, hg_mem⟩ := (hf.hasOpenLowerSections_add_isOpen (V := V 0) (hV 0).2.1).exists_continuous_selection
-    (by simp only [add_nonempty, hf_nonempty, true_and]; intro _; use 0; exact (hV 0).1)
-    (fun x ↦ (hf_convex x).add (hV 0).2.2.1)
-  obtain ⟨h, hh_cont, hh_mem, hh_mem_ball⟩ : ∃ h : ℕ → α → β, (∀ n, Continuous (h n)) ∧
-      (∀ n x, h n x ∈ f x + (V n)) ∧
-      (∀ n x, h (n + 1) x - h n x ∈ V (n + 1)) := by
-    let P (n : ℕ) (h : α → β) :=
-      Continuous h ∧ ∀ x, h x ∈ f x + (V n)
-    have step : ∀ n hn, P n hn →
-        ∃ h', P (n + 1) h' ∧ ∀ x, (h' x) - (hn x) ∈ V (n + 1) := by
-      intro n hn hn_prop
-      have : HasOpenLowerSections (fun x ↦ (f x + V (n + 1)) ∩ ({hn x} + V (n + 1))) :=
-        HasOpenLowerSections.inter
-          (hf.hasOpenLowerSections_add_isOpen (V := V (n + 1)) (hV _).2.1)
-          (hn_prop.1.lowerHemicontinuous.hasOpenLowerSections_add_isOpen
-            (V := V (n + 1)) (hV _).2.1)
-      obtain ⟨h', hh'_cont, hh'_mem⟩ := this.exists_continuous_selection sorry
-        fun x ↦ ((hf_convex _).add (hV _).2.2.1).inter <| (convex_singleton _).add (hV _).2.2.1
-      use h'
-      constructor
-      · constructor
-        · exact hh'_cont
-        · exact fun x ↦ (hh'_mem x).1
-      · intro x
-        have := (hh'_mem x).2
-        obtain ⟨y, hy, z, hz, hyz⟩ := this
-        simp at hy
-        rw [← hy, ← hyz]
-        simp [hz]
-    choose! F hF using step
-    let h : ℕ → α → β := Nat.rec g F
-    use h
-    rw [← forall_and, ← forall_and]
-    intro n
-    induction n with
-    | zero => simp [h, hg_cont, hg_mem, hF, P]
-    | succ n ih => simp [h, ih, P, hF]
-  have hBlah : ∀ n, ∀ i, n ≤ i → ∀ j, n ≤ j → ∀ x, h i x - h j x ∈ V n := by sorry
-  have hV' : ∀ u ∈ 𝓝 (0 : β), ∃ n, V n ⊆ u := sorry
-  have hFoo : UniformCauchySeqOn h Filter.atTop univ := by
-    rw [IsTopologicalAddGroup.uniformCauchySeqOn_iff]
-    intro u hu
-    obtain ⟨n, hn⟩ := hV' u hu
-    filter_upwards [(Filter.eventually_ge_atTop n).prod_mk (Filter.eventually_ge_atTop n)]
-    intro a ⟨ha₁, ha₂⟩
-    intro x _
-    exact mem_of_mem_of_subset (hBlah n a.2 ha₂ a.1 ha₁ x) hn
-    sorry -- Show the uniform spaces align
-  choose H hH using fun x ↦ cauchySeq_tendsto_of_complete (hFoo.cauchySeq (mem_univ x))
-  use H
-  constructor
-  · rw [← continuousOn_univ]
-    apply (hFoo.tendstoUniformlyOn_of_tendsto (fun x hx ↦ hH x)).continuousOn
-    exact Filter.Frequently.of_forall (by simp [hh_cont])
-  intro x
-  have hh : H x ∈ ⋂ n, closure (f x + V n) := sorry
-  have hh' : ⋂ n, closure (f x + V n) = f x := sorry
-  rwa [hh'] at hh
+-- open Pointwise Topology in
+-- /-- **Michael's selection theorem**: A lower hemicontinuous function from a paracompact Hausdorff
+-- space (which is necessarily normal) to a Banach space with nonempty convex closed values
+-- admits a continuous selection -/
+-- theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuous f)
+--     (hf_nonempty : ∀ x, (f x).Nonempty) (hf_convex : ∀ x, Convex ℝ (f x))
+--     (hf_isClosed : ∀ x, IsClosed (f x)) : ∃ g : α → β, Continuous g ∧ ∀ x, g x ∈ f x := by
+--   -- This proof is written to be compatible with a proof for Frechet spaces
+--   haveI : LocallyConvexSpace ℝ β := by sorry
+--   obtain ⟨V, hV⟩ := bar ℝ β
+--   obtain ⟨g, hg_cont, hg_mem⟩ := (hf.hasOpenLowerSections_add_isOpen (V := V 0) (hV 0).2.1).exists_continuous_selection
+--     (by simp only [add_nonempty, hf_nonempty, true_and]; intro _; use 0; exact (hV 0).1)
+--     (fun x ↦ (hf_convex x).add (hV 0).2.2.1)
+--   obtain ⟨h, hh_cont, hh_mem, hh_mem_ball⟩ : ∃ h : ℕ → α → β, (∀ n, Continuous (h n)) ∧
+--       (∀ n x, h n x ∈ f x + (V n)) ∧
+--       (∀ n x, h (n + 1) x - h n x ∈ V (n + 1)) := by
+--     let P (n : ℕ) (h : α → β) :=
+--       Continuous h ∧ ∀ x, h x ∈ f x + (V n)
+--     have step : ∀ n hn, P n hn →
+--         ∃ h', P (n + 1) h' ∧ ∀ x, (h' x) - (hn x) ∈ V (n + 1) := by
+--       intro n hn hn_prop
+--       have : HasOpenLowerSections (fun x ↦ ((f x) ∩ ({hn x} + V n)) + (V (n + 1))) := by
+--         refine LowerHemicontinuous.hasOpenLowerSections_add_isOpen ?_ (hV (n + 1)).2.1
+
+--         -- HasOpenLowerSections.inter
+--         --   (hf.hasOpenLowerSections_add_isOpen (V := V (n + 1)) (hV _).2.1)
+--         --   (hn_prop.1.lowerHemicontinuous.hasOpenLowerSections_add_isOpen
+--         --     (V := V (n + 1)) (hV _).2.1)
+--       obtain ⟨h', hh'_cont, hh'_mem⟩ := this.exists_continuous_selection (by
+--         intro x
+
+--         sorry
+--         )
+--         fun x ↦ ((hf_convex _).add (hV _).2.2.1).inter <| (convex_singleton _).add (hV _).2.2.1
+--       use h'
+--       constructor
+--       · constructor
+--         · exact hh'_cont
+--         · exact fun x ↦ (hh'_mem x).1
+--       · intro x
+--         have := (hh'_mem x).2
+--         obtain ⟨y, hy, z, hz, hyz⟩ := this
+--         simp at hy
+--         rw [← hy, ← hyz]
+--         simp [hz]
+--     choose! F hF using step
+--     let h : ℕ → α → β := Nat.rec g F
+--     use h
+--     rw [← forall_and, ← forall_and]
+--     intro n
+--     induction n with
+--     | zero => simp [h, hg_cont, hg_mem, hF, P]
+--     | succ n ih => simp [h, ih, P, hF]
+--   have hBlah : ∀ n, ∀ i, n ≤ i → ∀ j, n ≤ j → ∀ x, h i x - h j x ∈ V n := by sorry
+--   have hV' : ∀ u ∈ 𝓝 (0 : β), ∃ n, V n ⊆ u := sorry
+--   have hFoo : UniformCauchySeqOn h Filter.atTop univ := by
+--     rw [IsTopologicalAddGroup.uniformCauchySeqOn_iff]
+--     intro u hu
+--     obtain ⟨n, hn⟩ := hV' u hu
+--     filter_upwards [(Filter.eventually_ge_atTop n).prod_mk (Filter.eventually_ge_atTop n)]
+--     intro a ⟨ha₁, ha₂⟩
+--     intro x _
+--     exact mem_of_mem_of_subset (hBlah n a.2 ha₂ a.1 ha₁ x) hn
+--     sorry -- Show the uniform spaces align
+--   choose H hH using fun x ↦ cauchySeq_tendsto_of_complete (hFoo.cauchySeq (mem_univ x))
+--   use H
+--   constructor
+--   · rw [← continuousOn_univ]
+--     apply (hFoo.tendstoUniformlyOn_of_tendsto (fun x hx ↦ hH x)).continuousOn
+--     exact Filter.Frequently.of_forall (by simp [hh_cont])
+--   intro x
+--   have hh : H x ∈ ⋂ n, closure (f x + V n) := sorry
+--   have hh' : ⋂ n, closure (f x + V n) = f x := sorry
+--   rwa [hh'] at hh
 
 end
 

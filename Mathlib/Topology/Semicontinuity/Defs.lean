@@ -6,6 +6,7 @@ Authors: Sébastien Gouëzel, Antoine Chambert-Loir, Anatole Dedecker, Jireh Lor
 module
 
 public import Mathlib.Topology.Defs.Induced
+public import Mathlib.Topology.Constructions.SumProd
 import Mathlib.Topology.ContinuousOn
 
 /-!
@@ -1060,3 +1061,152 @@ theorem HasOpenLowerSections.comp
 end
 
 end Sections
+
+section Graph
+
+/-! ## Correspondence Graphs (CGraph)
+
+We define the graph of a correspondence `f : α → Set β` to be the set of all pairs
+`(x, y) : α × β` such that `y ∈ f x`.
+-/
+
+variable [TopologicalSpace β]
+
+/-- A function `f : α → Set β` has an open cgraph within `s` at `x` if, whenever `x.2 ∈ f x.1`,
+then `x'.2 ∈ f x'.1` for all `x'` sufficiently close to `x` within `s`. -/
+def HasOpenCGraphWithinAt (f : α → Set β) (s : Set (α × β)) (x : α × β) :=
+  ContinuousWithinAt (fun x : α × β ↦ x.2 ∈ f x.1) s x
+
+def HasOpenCGraphOn (f : α → Set β) (s : Set (α × β)) :=
+  ContinuousOn (fun x : α × β ↦ x.2 ∈ f x.1) s
+
+def HasOpenCGraphAt (f : α → Set β) (x : α × β) :=
+  ContinuousAt (fun x : α × β ↦ x.2 ∈ f x.1) x
+
+def HasOpenCGraph (f : α → Set β) :=
+  Continuous fun x : α × β ↦ x.2 ∈ f x.1
+
+/-! ### Iff lemmas -/
+
+variable {f : α → Set β} {s : Set (α × β)} {x : α × β}
+
+lemma hasOpenCGraphWithinAt_iff :
+    HasOpenCGraphWithinAt f s x ↔ (x.2 ∈ f x.1 → ∀ᶠ x' in 𝓝[s] x, x'.2 ∈ f x'.1) :=
+  tendsto_nhds_Prop
+
+lemma hasOpenCGraphOn_iff :
+    HasOpenCGraphOn f s ↔ ∀ x ∈ s, HasOpenCGraphWithinAt f s x :=
+  Iff.rfl
+
+lemma hasOpenCGraphAt_iff :
+    HasOpenCGraphAt f x ↔ (x.2 ∈ f x.1 → ∀ᶠ x' in 𝓝 x, x'.2 ∈ f x'.1) :=
+  tendsto_nhds_Prop
+
+lemma hasOpenCGraph_iff :
+    HasOpenCGraph f ↔ ∀ x, HasOpenCGraphAt f x :=
+  continuous_iff_continuousAt
+
+lemma HasOpenCGraph.isOpen (hf : HasOpenCGraph f) : IsOpen {x : α × β | x.2 ∈ f x.1} :=
+  continuous_Prop.mp hf
+
+/-- A correspondence has open cgraph iff its graph is an open subset of the product space. -/
+lemma hasOpenCGraph_iff_isOpen :
+    HasOpenCGraph f ↔ IsOpen {x : α × β | x.2 ∈ f x.1} :=
+  continuous_Prop
+
+/-! ### Basic dot notation interface -/
+
+variable {t : Set (α × β)}
+
+theorem HasOpenCGraphWithinAt.mono (h : HasOpenCGraphWithinAt f s x) (hst : t ⊆ s) :
+    HasOpenCGraphWithinAt f t x :=
+  ContinuousWithinAt.mono h hst
+
+theorem hasOpenCGraphWithinAt_univ_iff :
+    HasOpenCGraphWithinAt f univ x ↔ HasOpenCGraphAt f x :=
+  continuousWithinAt_univ _ _
+
+theorem HasOpenCGraphAt.hasOpenCGraphWithinAt (s : Set (α × β))
+    (h : HasOpenCGraphAt f x) : HasOpenCGraphWithinAt f s x :=
+  h.continuousWithinAt
+
+theorem HasOpenCGraphOn.hasOpenCGraphWithinAt (h : HasOpenCGraphOn f s)
+    (hx : x ∈ s) : HasOpenCGraphWithinAt f s x :=
+  h.continuousWithinAt hx
+
+theorem HasOpenCGraphOn.mono (h : HasOpenCGraphOn f s) (hst : t ⊆ s) :
+    HasOpenCGraphOn f t :=
+  ContinuousOn.mono h hst
+
+theorem hasOpenCGraphOn_univ_iff :
+    HasOpenCGraphOn f univ ↔ HasOpenCGraph f :=
+  continuousOn_univ
+
+theorem hasOpenCGraphOn_iff_restrict :
+    HasOpenCGraphOn f s ↔ Continuous (s.restrict (fun x : α × β ↦ x.2 ∈ f x.1)) :=
+  continuousOn_iff_continuous_restrict
+
+theorem HasOpenCGraph.hasOpenCGraphAt (h : HasOpenCGraph f) (x : α × β) :
+    HasOpenCGraphAt f x :=
+  h.continuousAt
+
+theorem HasOpenCGraph.hasOpenCGraphWithinAt (h : HasOpenCGraph f) (s : Set (α × β))
+    (x : α × β) : HasOpenCGraphWithinAt f s x :=
+  h.continuousWithinAt
+
+theorem HasOpenCGraph.hasOpenCGraphOn (h : HasOpenCGraph f) (s : Set (α × β)) :
+    HasOpenCGraphOn f s :=
+  h.continuousOn
+
+
+/-! ### Constants -/
+
+theorem HasOpenLowerSectionsWithinAt.const : HasOpenLowerSectionsWithinAt (fun _x => z) s x :=
+  SemicontinuousWithinAt.const
+
+theorem HasOpenLowerSectionsAt.const : HasOpenLowerSectionsAt (fun _x => z) x :=
+  SemicontinuousAt.const
+
+theorem HasOpenLowerSectionsOn.const : HasOpenLowerSectionsOn (fun _x => z) s :=
+  SemicontinuousOn.const
+
+theorem HasOpenLowerSections.const : HasOpenLowerSections fun _x : α => z :=
+  Semicontinuous.const
+
+/-! ### Intersection -/
+
+theorem HasOpenLowerSections.inter {f g : α → Set β} (hf : HasOpenLowerSections f)
+    (hg : HasOpenLowerSections g) : HasOpenLowerSections (fun x ↦ f x ∩ g x) := by
+  rw [hasOpenLowerSections_iff_isOpen]
+  exact fun b ↦ by simpa using (hf.isOpen b).inter (hg.isOpen b)
+
+/-! ### Composition -/
+
+section
+
+variable {γ : Type*} [TopologicalSpace γ] {g : γ → α} {c : γ} {t : Set γ}
+
+theorem HasOpenLowerSectionsWithinAt.comp
+    (hf : HasOpenLowerSectionsWithinAt f s (g c)) (hg : ContinuousWithinAt g t c)
+    (hg' : MapsTo g t s) :
+    HasOpenLowerSectionsWithinAt (f ∘ g) t c :=
+  -- the elaboration aid is necessary.
+  SemicontinuousWithinAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+
+theorem HasOpenLowerSectionsAt.comp
+    (hf : HasOpenLowerSectionsAt f (g c)) (hg : ContinuousAt g c) :
+    HasOpenLowerSectionsAt (f ∘ g) c :=
+  SemicontinuousAt.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+
+theorem HasOpenLowerSectionsOn.comp
+    (hf : HasOpenLowerSectionsOn f s) (hg : ContinuousOn g t) (hg' : MapsTo g t s) :
+    HasOpenLowerSectionsOn (f ∘ g) t :=
+  SemicontinuousOn.comp (r := (fun x b ↦ b ∈ f x)) hf hg hg'
+
+theorem HasOpenLowerSections.comp
+    (hf : HasOpenLowerSections f) (hg : Continuous g) : HasOpenLowerSections (f ∘ g) :=
+  Semicontinuous.comp (r := (fun x b ↦ b ∈ f x)) hf hg
+
+end
+
+end Graph
