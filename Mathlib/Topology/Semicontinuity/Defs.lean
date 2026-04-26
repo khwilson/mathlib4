@@ -1213,10 +1213,33 @@ theorem HasOpenCGraph.comp (hf : HasOpenCGraph f) (hg : Continuous g') :
 
 end
 
-/-! ### Open graphs imply open lower sections -/
+/-! ### Implications
 
-theorem HasOpenCGraph.hasOpenLowerSections (hf : HasOpenCGraph f) :
+A correspondence with an open graph has open lower sections. And a correspondence
+with open lower sections is lower hemicontinuous.
+-/
+
+theorem HasOpenLowerSectionsWithinAt.lowerHemicontinuousWithinAt {f : α → Set β} {s : Set α} {x : α}
+    (hf : HasOpenLowerSectionsWithinAt f s x) : LowerHemicontinuousWithinAt f s x :=
+  fun _ ⟨hopen, ⟨y, hyfx, hyt⟩⟩ ↦ (hf y hyfx).mono fun _ hy' ↦ ⟨hopen, y, hy', hyt⟩
+
+theorem HasOpenLowerSectionsOn.LowerHemicontinuousOn {f : α → Set β} {s : Set α}
+    (hf : HasOpenLowerSectionsOn f s) : LowerHemicontinuousOn f s :=
+  fun _ hx ↦ (hf.hasOpenLowerSectionsWithinAt hx).lowerHemicontinuousWithinAt
+
+theorem HasOpenLowerSectionsAt.lowerHemicontinuousAt {f : α → Set β} {x : α}
+    (hf : HasOpenLowerSectionsAt f x) : LowerHemicontinuousAt f x :=
+  fun _ ⟨hopen, ⟨y, hyfx, hyt⟩⟩ ↦ (hf y hyfx).mono fun _ hy' ↦ ⟨hopen, y, hy', hyt⟩
+
+theorem HasOpenLowerSections.lowerHemicontinuous {f : α → Set β} (hf : HasOpenLowerSections f) :
+    LowerHemicontinuous f := fun x ↦ (hf.hasOpenLowerSectionsAt x).lowerHemicontinuousAt
+
+theorem HasOpenCGraph.hasOpenLowerSections
+    {f : α → Set β} (h : HasOpenCGraph f) :
     HasOpenLowerSections f := by
-  sorry
+  intro x b hb
+  have hopen : IsOpen {x' : α | b ∈ f x'} := by
+    simpa using h.isOpen.preimage (continuous_id.prodMk continuous_const)
+  simpa using hopen.mem_nhds hb
 
 end Graph
