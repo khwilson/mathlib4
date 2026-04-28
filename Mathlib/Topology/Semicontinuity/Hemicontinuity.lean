@@ -10,7 +10,6 @@ public import Mathlib.Topology.NhdsWithin
 public import Mathlib.Topology.Separation.Regular
 public import Mathlib.Topology.Defs.Sequences
 import Mathlib.Topology.Sequences
-import Mathlib.Topology.ContinuousOn
 
 /-! # Hemicontinuity
 
@@ -355,3 +354,38 @@ lemma hasOpenLowerSections_iff_isClosed_preimage_Iic :
     HasOpenLowerSections f ↔ ∀ b, IsClosed (f ⁻¹' (Iic {b}ᶜ)) := by
   simp_rw [← isOpen_compl_iff]
   exact hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl
+
+/-! ### Continuity
+
+The correspondence associated with a continuous map is both lower and upper hemicontinuous.
+-/
+
+lemma Continuous.lowerHemicontinuous {f : α → β} (hf : Continuous f) :
+    LowerHemicontinuous (fun x ↦ {f x}) := by
+  rw [lowerHemicontinuous_iff_isOpen_inter_nonempty]
+  intro u hu
+  have : {x | f x ∈ u} = f ⁻¹' u := by ext; simp
+  simpa [this] using hf.isOpen_preimage _ hu
+
+lemma Continuous.upperHemicontinuous {f : α → β} (hf : Continuous f) :
+    UpperHemicontinuous (fun x ↦ {f x}) := by
+  rw [upperHemicontinuous_iff_forall_isOpen]
+  intro x u hu hxu
+  simp [hf.continuousAt.eventually_mem <| hu.mem_nhds (singleton_subset_iff.mp hxu)]
+
+/-! ### Open Graphs -/
+
+/-- A lower hemicontinuous function intersected with a function with an open graph is lower
+hemicontinuous. -/
+lemma LowerHemicontinuous.inter_hasOpenGraph {f g : α → Set β}
+    (hf : LowerHemicontinuous f) (hg : HasOpenCGraph g) :
+    LowerHemicontinuous (fun x ↦ f x ∩ g x) := by
+  simp_rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at ⊢ hf
+  intro t ht
+  rw [isOpen_iff_forall_mem_open]
+  intro x ⟨y, ⟨hyf, hyg⟩, hyt⟩
+  obtain ⟨U, V, hU, hV, hxU, hyV, hUV⟩ := (isOpen_prod_iff.mp hg.isOpen) x y hyg
+  refine ⟨U ∩ {x' | (f x' ∩ (t ∩ V)).Nonempty}, ?_, hU.inter (hf _ (ht.inter hV)),
+      ⟨hxU, y, hyf, hyt, hyV⟩⟩
+  intro x' ⟨hx'U, z, hzf, hzt, hzV⟩
+  exact ⟨z, ⟨hzf, hUV (Set.mk_mem_prod hx'U hzV)⟩, hzt⟩

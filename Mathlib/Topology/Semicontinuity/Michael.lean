@@ -72,12 +72,25 @@ theorem bar
     refine ⟨⟨?_, ?_, ?_, ?_, ?_⟩, ?_, ?_⟩
     iterate simp [hx₁_prop, zero_mem_smul_set, IsOpen.inter, IsOpen.smul₀,
       Convex.inter, Convex.smul]
-    sorry
+    · intro y ⟨hy₁, hy₂⟩
+      obtain ⟨z, hz, rfl⟩ := hy₁
+      exact ⟨⟨-z, (hx₁_prop i).2.2.2 z hz, smul_neg _ _⟩, (hx₁_prop (n + 1)).2.2.2 _ hy₂⟩
     have := (Set.inter_subset_inter_right ((2 : 𝕜)⁻¹ • x₁ i) (hx₁_basis.antitone (show n ≤ n + 1 by norm_num)))
     exact this.trans (Set.inter_subset_right)
     intro y ⟨z, ⟨hz, _⟩, a, ⟨ha, _⟩, haz⟩
     grind [mem_add, (hx₁_prop i).2.2.1.add_half_self_eq_self]
-    sorry
+    · apply (closure_mono inter_subset_left).trans
+      intro x hx
+      rw [mem_closure_iff_nhds] at hx
+      have htOpen' : IsOpen ((2 : 𝕜)⁻¹ • x₁ i) := (hx₁_prop i).2.1.smul₀ (by norm_num)
+      have ht0' : (0 : E) ∈ (2 : 𝕜)⁻¹ • x₁ i := ⟨0, (hx₁_prop i).1, smul_zero _⟩
+      have hU : IsOpen {y : E | x - y ∈ (2 : 𝕜)⁻¹ • x₁ i} :=
+        htOpen'.preimage (continuous_const.sub continuous_id)
+      obtain ⟨a, ha_mem, ha_t⟩ := hx _ (hU.mem_nhds (by simp [ht0']))
+      have hmem : x ∈ (2 : 𝕜)⁻¹ • x₁ i + (2 : 𝕜)⁻¹ • x₁ i :=
+        ⟨x - a, ha_t, a, ha_mem, sub_add_cancel x a⟩
+      rw [(hx₁_prop i).2.2.1.add_half_self_eq_self] at hmem
+      exact hi hmem
   choose! F hF using step
   let x : ℕ → Set E := Nat.rec (x₁ 0) F
   use x

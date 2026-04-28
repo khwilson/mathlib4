@@ -30,25 +30,6 @@ open scoped Pointwise Topology
 
 variable {α β : Type*} [TopologicalSpace α]
 
-section topologicalSpace
-
-variable [TopologicalSpace β]
-
-lemma Continuous.lowerHemicontinuous {f : α → β} (hf : Continuous f) :
-    LowerHemicontinuous (fun x ↦ {f x}) := by
-  rw [lowerHemicontinuous_iff_isOpen_inter_nonempty]
-  intro u hu
-  have : {x | f x ∈ u} = f ⁻¹' u := by ext; simp
-  simpa [this] using hf.isOpen_preimage _ hu
-
-lemma Continuous.upperHemicontinuous {f : α → β} (hf : Continuous f) :
-    UpperHemicontinuous (fun x ↦ {f x}) := by
-  rw [upperHemicontinuous_iff_forall_isOpen]
-  intro x u hu hxu
-  simp [hf.continuousAt.eventually_mem <| hu.mem_nhds (singleton_subset_iff.mp hxu)]
-
-end topologicalSpace
-
 section topologicalVectorSpace
 
 open scoped Pointwise
@@ -128,20 +109,6 @@ lemma LowerHemicontinuous.hasOpenLowerSections_add_isOpen {f : α → Set β}
   have hU : IsOpen U := hV.preimage (continuous_const.sub continuous_id)
   rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at hf
   exact hf U hU
-
-omit [AddCommGroup β] [ContinuousSub β] in
-lemma LowerHemicontinuous.inter_hasOpenGraph {f g : α → Set β}
-    (hf : LowerHemicontinuous f) (hg : HasOpenCGraph g) :
-    LowerHemicontinuous (fun x ↦ f x ∩ g x) := by
-  simp_rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at ⊢ hf
-  intro t ht
-  rw [isOpen_iff_forall_mem_open]
-  intro x ⟨y, ⟨hyf, hyg⟩, hyt⟩
-  obtain ⟨U, V, hU, hV, hxU, hyV, hUV⟩ := (isOpen_prod_iff.mp hg.isOpen) x y hyg
-  refine ⟨U ∩ {x' | (f x' ∩ (t ∩ V)).Nonempty}, ?_, hU.inter (hf _ (ht.inter hV)),
-      ⟨hxU, y, hyf, hyt, hyV⟩⟩
-  intro x' ⟨hx'U, z, hzf, hzt, hzV⟩
-  exact ⟨z, ⟨hzf, hUV (Set.mk_mem_prod hx'U hzV)⟩, hzt⟩
 
 end topologicalVectorSpace
 
