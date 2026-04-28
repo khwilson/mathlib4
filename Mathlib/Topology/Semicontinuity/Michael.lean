@@ -65,20 +65,22 @@ theorem bar
       (𝓝 0).HasAntitoneBasis x := by
   obtain ⟨x₁, hx₁_prop, hx₁_basis⟩ := (LocallyConvexSpace.convex_open_symm_basis_zero 𝕜 E).exists_antitone_subbasis
   let P := fun (n : ℕ) (s : Set E) ↦ 0 ∈ s ∧ IsOpen s ∧ Convex 𝕜 s ∧ (∀ y ∈ s, -y ∈ s) ∧ (s ⊆ x₁ n)
-  have step : ∀ n s, P n s → ∃ s', P n s' ∧ s' + s' ⊆ s ∧ closure s' ⊆ s :=  by
+  have step : ∀ n s, P n s → ∃ s', P (n + 1) s' ∧ s' + s' ⊆ s ∧ closure s' ⊆ s := by
     intro n s ⟨h₀, h_open, h_conv, h_symm, hsx⟩
     obtain ⟨i, hi⟩ := hx₁_basis.mem_iff.mp (h_open.mem_nhds h₀)
     use ((2 : 𝕜)⁻¹ • x₁ i) ∩ (x₁ (n + 1))
     refine ⟨⟨?_, ?_, ?_, ?_, ?_⟩, ?_, ?_⟩
-    iterate simp [hx₁_prop, zero_mem_smul_set, IsOpen.inter, IsOpen.smul₀,
-      Convex.inter, Convex.smul]
+    · exact ⟨⟨0, (hx₁_prop i).1, smul_zero _⟩, (hx₁_prop (n + 1)).1⟩
+    · exact ((hx₁_prop i).2.1.smul₀ (by norm_num)).inter (hx₁_prop (n + 1)).2.1
+    · exact ((hx₁_prop i).2.2.1.smul _).inter (hx₁_prop (n + 1)).2.2.1
     · intro y ⟨hy₁, hy₂⟩
       obtain ⟨z, hz, rfl⟩ := hy₁
       exact ⟨⟨-z, (hx₁_prop i).2.2.2 z hz, smul_neg _ _⟩, (hx₁_prop (n + 1)).2.2.2 _ hy₂⟩
-    have := (Set.inter_subset_inter_right ((2 : 𝕜)⁻¹ • x₁ i) (hx₁_basis.antitone (show n ≤ n + 1 by norm_num)))
-    exact this.trans (Set.inter_subset_right)
-    intro y ⟨z, ⟨hz, _⟩, a, ⟨ha, _⟩, haz⟩
-    grind [mem_add, (hx₁_prop i).2.2.1.add_half_self_eq_self]
+    · exact Set.inter_subset_right
+    · rintro y ⟨z, ⟨hz, _⟩, a, ⟨ha, _⟩, rfl⟩
+      apply hi
+      rw [← (hx₁_prop i).2.2.1.add_half_self_eq_self]
+      exact Set.add_mem_add hz ha
     · apply (closure_mono inter_subset_left).trans
       intro x hx
       rw [mem_closure_iff_nhds] at hx
@@ -88,27 +90,33 @@ theorem bar
         htOpen'.preimage (continuous_const.sub continuous_id)
       obtain ⟨a, ha_mem, ha_t⟩ := hx _ (hU.mem_nhds (by simp [ht0']))
       have hmem : x ∈ (2 : 𝕜)⁻¹ • x₁ i + (2 : 𝕜)⁻¹ • x₁ i :=
-        ⟨x - a, ha_t, a, ha_mem, sub_add_cancel x a⟩
+        sub_add_cancel x a ▸ Set.add_mem_add (show x - a ∈ (2 : 𝕜)⁻¹ • x₁ i from ha_mem) ha_t
       rw [(hx₁_prop i).2.2.1.add_half_self_eq_self] at hmem
       exact hi hmem
   choose! F hF using step
   let x : ℕ → Set E := Nat.rec (x₁ 0) F
   use x
-  have hx_props : ∀ n, 0 ∈ x n ∧ IsOpen (x n) ∧ Convex 𝕜 (x n) ∧ (∀ y ∈ x n, -y ∈ x n) ∧ x n ⊆ x₁ n := by
+  have hx_props : ∀ n, P n (x n) := by
     intro n
     induction n with
     | zero => exact ⟨(hx₁_prop 0).1, (hx₁_prop 0).2.1, (hx₁_prop 0).2.2.1,
         (hx₁_prop 0).2.2.2, le_refl _⟩
-    | succ n ih =>
-      obtain ⟨h0, hOpen, hConv, hSymm, hsub⟩ := ih
-      obtain ⟨h0', hOpen', hConv', hSymm', hsub', _, _⟩ := hF n (x n) ⟨h0, hOpen, hConv, hSymm, hsub⟩
-      exact ⟨h0', hOpen', hConv', hSymm', hsub'⟩
+    | succ n ih => exact (hF n (x n) ih).1
+  have hx_step : ∀ n, x (n + 1) ⊆ x n := by
+    intro n
+    obtain ⟨_, hsum, _⟩ := hF n (x n) (hx_props n)
+    intro z hz
+    simpa using hsum (Set.add_mem_add hz (hx_props (n + 1)).1)
+  have hx_antitone : Antitone x := antitone_nat_of_succ_le hx_step
+  have hx_basis : (𝓝 0).HasBasis (fun _ : ℕ ↦ True) x :=
+    hx₁_basis.toHasBasis.to_hasBasis
+      (fun i _ ↦ ⟨i, trivial, (hx_props i).2.2.2.2⟩)
+      (fun j _ ↦ hx₁_basis.toHasBasis.mem_iff.mp ((hx_props j).2.1.mem_nhds (hx_props j).1))
+  refine ⟨?_, ⟨hx_basis, hx_antitone⟩⟩
   intro n
-  obtain ⟨h0, hOpen, hConv, hSymm, hsub⟩ := hx_props n
-  obtain ⟨_, _, _, _, _, hsum, hclosure⟩ := hF n (x n) ⟨h0, hOpen, hConv, hSymm, hsub⟩
-  refine ⟨h0, hOpen, hConv, fun y hy ↦ ⟨hSymm y hy, ?_, hsum, hclosure⟩⟩
-  intro z hz
-  simpa using hsum (Set.add_mem_add hz (hx_props (n + 1)).1)
+  obtain ⟨h0, hOpen, hConv, hSymm, _⟩ := hx_props n
+  obtain ⟨_, hsum, hclosure⟩ := hF n (x n) (hx_props n)
+  exact ⟨h0, hOpen, hConv, fun y hy ↦ ⟨hSymm y hy, hsum, hclosure⟩⟩
 
 end
 
