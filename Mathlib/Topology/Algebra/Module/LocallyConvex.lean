@@ -132,6 +132,19 @@ theorem LocallyConvexSpace.convex_open_basis_zero [LocallyConvexSpace 𝕜 E] :
         interior_subset⟩)
     fun s hs => ⟨s, ⟨hs.2.1.mem_nhds hs.1, hs.2.2⟩, subset_rfl⟩
 
+theorem LocallyConvexSpace.convex_open_symm_basis_zero [LocallyConvexSpace 𝕜 E] :
+    (𝓝 0 : Filter E).HasBasis (fun s ↦
+      (0 : E) ∈ s ∧ IsOpen s ∧ Convex 𝕜 s ∧ ∀ y ∈ s, -y ∈ s) id := by
+  refine (LocallyConvexSpace.convex_open_basis_zero 𝕜 E).to_hasBasis ?_
+    (fun t ht ↦ ⟨t, by simp [ht]⟩)
+  · intro t ⟨h₀, ho, hc⟩
+    refine ⟨t ∩ -t, ?_, by simp⟩
+    · refine ⟨by simp [h₀], ho.inter ho.neg, hc.inter hc.neg, ?_⟩
+      intro y ⟨hy, hyneg⟩
+      constructor
+      · rwa [← neg_neg t, Set.neg_mem_neg]
+      · simp [hy]
+
 variable {𝕜 E} [LocallyConvexSpace 𝕜 E] {s t : Set E} {x : E}
 
 /-- In a locally convex space, every two disjoint convex sets such that one is compact and the other

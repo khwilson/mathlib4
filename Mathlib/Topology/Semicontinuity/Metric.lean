@@ -106,7 +106,6 @@ theorem LowerHemicontinuous.hasOpenGraph_add_isOpen {f : α → Set β}
   rw [Set.mem_add]
   exact ⟨z', hz'_f, y' - z', h_sub, by abel⟩
 
-
 lemma LowerHemicontinuous.hasOpenLowerSections_add_isOpen {f : α → Set β}
     (hf : LowerHemicontinuous f) {V : Set β} (hV : IsOpen V) :
     HasOpenLowerSections (fun x ↦ f x + V) := by
@@ -130,11 +129,20 @@ lemma LowerHemicontinuous.hasOpenLowerSections_add_isOpen {f : α → Set β}
   rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at hf
   exact hf U hU
 
+omit [AddCommGroup β] [ContinuousSub β] in
 lemma LowerHemicontinuous.inter_hasOpenGraph {f g : α → Set β}
-    (hf : LowerHemicontinuous f) (hg : IsOpen {x : α × β | x.2 ∈ g x.1}) :
+    (hf : LowerHemicontinuous f) (hg : HasOpenCGraph g) :
     LowerHemicontinuous (fun x ↦ f x ∩ g x) := by
-  rw [lowerHemicontinuous_iff_isOpen_inter_nonempty]
-  sorry
+  simp_rw [lowerHemicontinuous_iff_isOpen_inter_nonempty] at ⊢ hf
+  intro t ht
+  rw [isOpen_iff_forall_mem_open]
+  intro x ⟨y, ⟨hyf, hyg⟩, hyt⟩
+  obtain ⟨U, V, hU, hV, hxU, hyV, hUV⟩ := (isOpen_prod_iff.mp hg.isOpen) x y hyg
+  refine ⟨U ∩ {x' | (f x' ∩ (t ∩ V)).Nonempty}, ?_, hU.inter (hf _ (ht.inter hV)),
+      ⟨hxU, y, hyf, hyt, hyV⟩⟩
+  intro x' ⟨hx'U, z, hzf, hzt, hzV⟩
+  exact ⟨z, ⟨hzf, hUV (Set.mk_mem_prod hx'U hzV)⟩, hzt⟩
+
 end topologicalVectorSpace
 
 section metric

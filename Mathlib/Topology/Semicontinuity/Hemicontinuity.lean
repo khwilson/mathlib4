@@ -284,8 +284,7 @@ end Inducing
 
 The more general fact is that if `f` is upper hemicontinuous at `x₀` within `s`, and if
 `x₀` is a cluster point of `s ∩ {x | (f x).Nonempty}`, then `(f x₀).Nonempty`. -/
-lemma UpperHemicontinuous.isClosed_domain {α β : Type*} [TopologicalSpace α]
-    [TopologicalSpace β] {f : α → Set β} (hf : UpperHemicontinuous f) :
+lemma UpperHemicontinuous.isClosed_domain (hf : UpperHemicontinuous f) :
     IsClosed {x | (f x).Nonempty} := by
   simp only [← isOpen_compl_iff, compl_setOf, not_nonempty_iff_eq_empty, isOpen_iff_mem_nhds]
   intro x (hx : f x = ∅)
@@ -301,8 +300,7 @@ of sequences `x : ℕ → α` and `y : ℕ → β` such that `x` tends to `x₀`
 set containing all `f x'` for `x'` sufficiently close to `x`.
 
 This is a partial converse of `UpperHemicontinuousAt.mem_of_tendsto`. -/
-lemma UpperHemicontinuousAt.of_sequences {α β : Type*} [TopologicalSpace α]
-    [TopologicalSpace β] {f : α → Set β} {x₀ : α} [(𝓝 x₀).IsCountablyGenerated]
+lemma UpperHemicontinuousAt.of_sequences {x₀ : α} [(𝓝 x₀).IsCountablyGenerated]
     {K : Set β} (hK : IsSeqCompact K) (hf : ∀ᶠ x in 𝓝 x₀, f x ⊆ K)
     (h : ∀ x : ℕ → α, Tendsto x atTop (𝓝 x₀) →
       ∀ y : ℕ → β, (∀ n, y n ∈ f (x n)) → ∀ y₀, Tendsto y atTop (𝓝 y₀) → y₀ ∈ f x₀) :
@@ -323,9 +321,8 @@ closed, then for any sequences `x` and `y` (in `α` and `β`, respectively) tend
 respectively, if `y n ∈ f (x n)` frequently, then `y₀ ∈ f x₀`.
 
 This is a partial converse of `UpperHemicontinuousAt.of_sequences`. -/
-lemma UpperHemicontinuousAt.mem_of_tendsto {α β ι : Type*} [TopologicalSpace α]
-    [TopologicalSpace β] [RegularSpace β] {f : α → Set β} {x₀ : α} {l : Filter ι}
-    (hf : UpperHemicontinuousAt f x₀) (hf_closed : IsClosed (f x₀))
+lemma UpperHemicontinuousAt.mem_of_tendsto {ι : Type*} [RegularSpace β] {x₀ : α}
+    {l : Filter ι} (hf : UpperHemicontinuousAt f x₀) (hf_closed : IsClosed (f x₀))
     {x : ι → α} (hx : Tendsto x l (𝓝 x₀))
     {y : ι → β} (hy : ∃ᶠ n in l, y n ∈ f (x n)) {y₀ : β} (hy₀ : Tendsto y l (𝓝 y₀)) :
     y₀ ∈ f x₀ := by
@@ -342,6 +339,7 @@ lemma UpperHemicontinuousAt.mem_of_tendsto {α β ι : Type*} [TopologicalSpace 
 
 /-! ### Open lower sections -/
 
+omit [TopologicalSpace β] in
 /-- A correspondence `f : α → Set β` has open lower sections if and only if its *lower inverse*
 (i.e., `b : β ↦ (f ⁻¹' (Iic {b}ᶜ))ᶜ = {x | b ∈ f x}`) sends every point to an open set. -/
 lemma hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl :
@@ -350,23 +348,10 @@ lemma hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl :
     simp [Set.ext_iff, Iic, Set.mem_compl_iff]
   simp_rw [h, hasOpenLowerSections_iff_isOpen]
 
+omit [TopologicalSpace β] in
 /-- A correspondence `f : α → Set β` has open lower sections if and only if its *upper inverse*
 (i.e., `b : β ↦ f ⁻¹' (Iic {b}ᶜ) = {x | b ∉ f x}`) sends every point to a closed set. -/
 lemma hasOpenLowerSections_iff_isClosed_preimage_Iic :
     HasOpenLowerSections f ↔ ∀ b, IsClosed (f ⁻¹' (Iic {b}ᶜ)) := by
   simp_rw [← isOpen_compl_iff]
   exact hasOpenLowerSections_iff_isOpen_compl_preimage_Iic_compl
-
-/-- A correspondence with open lower sections is lower hemicontinuous: if every section
-`{x | b ∈ f x}` is open, then for every open `u`, the set `{x | f x ∩ u ≠ ∅}` is open
-as a union over `b ∈ u` of the open sections. -/
-lemma HasOpenLowerSections.lowerHemicontinuous (hf : HasOpenLowerSections f) :
-    LowerHemicontinuous f := by
-  rw [lowerHemicontinuous_iff_isOpen_compl_preimage_Iic_compl]
-  intro u _hu
-  have h1 : (f ⁻¹' (Iic uᶜ))ᶜ = {x | (f x ∩ u).Nonempty} := by
-    simp [Set.ext_iff, Iic, Set.mem_compl_iff, Set.not_subset, Set.Nonempty]
-  have h2 : {x | (f x ∩ u).Nonempty} = ⋃ b ∈ u, {x | b ∈ f x} := by
-    ext x; simp [Set.Nonempty, Set.mem_inter_iff, and_comm]
-  rw [h1, h2]
-  exact isOpen_biUnion fun b _ ↦ hasOpenLowerSections_iff_isOpen.mp hf b
