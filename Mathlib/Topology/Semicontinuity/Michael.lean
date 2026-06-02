@@ -32,12 +32,12 @@ public section
 open Set Metric
 open scoped Pointwise Topology
 
-variable {α β : Type*} {f : α → Set β} [TopologicalSpace α]
+variable {α β : Type*}
 
 section tvs
 
-lemma LowerHemicontinuous.hasOpenCGraph_of_add_isOpen
-      [TopologicalSpace β] [AddGroup β] [IsTopologicalAddGroup β]
+lemma LowerHemicontinuous.hasOpenCGraph_of_add_isOpen {f : α → Set β}
+      [TopologicalSpace α] [TopologicalSpace β] [AddGroup β] [IsTopologicalAddGroup β]
       (hf : LowerHemicontinuous f) {V : Set β} (hV : IsOpen V) :
     HasOpenCGraph (fun x ↦ f x + V) := by
   unfold HasOpenCGraph
@@ -57,10 +57,9 @@ lemma LowerHemicontinuous.hasOpenCGraph_of_add_isOpen
 
 end tvs
 
-variable {g : α → β} [NormalSpace α] [ParacompactSpace α]
-
 section approximate
 
+variable {g : α → β} [TopologicalSpace α] [NormalSpace α] [ParacompactSpace α]
 variable [AddCommGroup β] [Module ℝ β] [TopologicalSpace β] [ContinuousAdd β]
   [ContinuousSMul ℝ β] {f : α → Set β}
 
@@ -82,8 +81,10 @@ end approximate
 
 section michael
 
+variable [TopologicalSpace α] [NormalSpace α] [ParacompactSpace α]
 variable [AddCommGroup β] [Module ℝ β] [UniformSpace β] [IsUniformAddGroup β]
     [ContinuousSMul ℝ β] [LocallyConvexSpace ℝ β] [FirstCountableTopology β] [CompleteSpace β]
+    {f : α → Set β}
 
 /-- **Michael's selection theorem**: A lower hemicontinuous function from a paracompact Hausdorff
 space (which is necessarily normal) to a Frechet space with nonempty convex closed values
@@ -189,5 +190,54 @@ theorem LowerHemicontinuous.exists_continuous_selection (hf : LowerHemicontinuou
       exact hab ▸ Set.add_mem_add ha (hV.1.antitone hi hb))
 
 end michael
+
+section continuousLinearMap
+
+/-! ### Consequences
+
+This section records some consequences of Michael's selection theorem.
+-/
+
+variable [AddCommGroup α] [Module ℝ α] [UniformSpace α] [IsUniformAddGroup α]
+  [ContinuousSMul ℝ α] [LocallyConvexSpace ℝ α] [FirstCountableTopology α] [CompleteSpace α]
+  [AddCommGroup β] [Module ℝ β] [TopologicalSpace β] [T4Space β] [ParacompactSpace β]
+
+/-- A continuous linear map that is also open admits a continuous selection on a set whose image
+is closed. -/
+lemma ContinuousLinearMap.exists_continuous_selection_of_isOpenMap_isClosed_image
+    {f : α →L[ℝ] β} {K : Set α} (hf : IsOpenMap f) (hfK_closed : IsClosed (f '' K)) :
+    ∃ g : β → α, ContinuousOn g (f '' K) ∧ Set.RightInvOn g f (f '' K) := by
+  classical
+  -- Closed subspaces of normal/paracompact spaces are normal/paracompact via the closed embedding
+  haveI := hfK_closed.isClosedEmbedding_subtypeVal.normalSpace
+  haveI := hfK_closed.isClosedEmbedding_subtypeVal.paracompactSpace
+  -- Declare hf_nonempty separately with explicit type to avoid metavariable inference failures.
+  have hf_nonempty : ∀ x : f '' K, (f ⁻¹' {x.val}).Nonempty := by
+    intro ⟨y, a, _, hfa⟩
+    exact ⟨a, by simp [hfa]⟩
+  -- Apply Michael's selection theorem to the fiber correspondence restricted to ↥(f '' K)
+  have hLHC := isOpenMap_iff_lowerHemicontinuous.mp hf
+  obtain ⟨g₀, hg₀_cont, hg₀_sel⟩ :=
+    (hLHC.comp continuous_subtype_val).exists_continuous_selection
+      hf_nonempty
+      (fun x ↦ by
+        intro x₁ hx₁ x₂ hx₂ a b ha hb hab
+        have hx₁' := Set.mem_singleton_iff.mp (Set.mem_preimage.mp hx₁)
+        have hx₂' := Set.mem_singleton_iff.mp (Set.mem_preimage.mp hx₂)
+        apply Set.mem_preimage.mpr
+        rw [Set.mem_singleton_iff, f.map_add, f.map_smul, f.map_smul,
+            hx₁', hx₂', ← add_smul, hab, one_smul])
+      (fun x ↦ isClosed_singleton.preimage f.continuous)
+  refine ⟨fun y ↦ if h : y ∈ f '' K then g₀ ⟨y, h⟩ else 0, ?_, ?_⟩
+  · apply continuousOn_iff_continuous_restrict.mpr
+    have heq : Set.restrict (f '' K) (fun y => if h : y ∈ f '' K then g₀ ⟨y, h⟩ else 0) = g₀ :=
+      funext fun x => dif_pos x.property
+    rw [heq]; exact hg₀_cont
+  · intro y hy
+    change f (if h : y ∈ f '' K then g₀ ⟨y, h⟩ else 0) = y
+    rw [dif_pos hy]
+    exact Set.mem_singleton_iff.mp (Set.mem_preimage.mp (hg₀_sel ⟨y, hy⟩))
+
+end continuousLinearMap
 
 end
