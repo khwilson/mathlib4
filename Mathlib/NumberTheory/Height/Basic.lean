@@ -321,7 +321,7 @@ private lemma hasFiniteMulSupport_iSup_nonarchAbsVal {x : ι → K} (hx : x ≠ 
     refine le_antisymm (ciSup_le fun j ↦ ?_) (ciSup_le fun ⟨j, hj⟩ ↦ Finite.le_ciSup_of_le j le_rfl)
     rcases eq_or_ne (x j) 0 with h | h
     · rw [h, v.val.map_zero]
-      exact Real.iSup_nonneg' ⟨⟨i, hi⟩, v.val.nonneg ..⟩
+      exact iSup_nonneg' ⟨⟨i, hi⟩, v.val.nonneg ..⟩
     · exact Finite.le_ciSup_of_le ⟨j, h⟩ le_rfl
   fun_prop (disch := grind)
 

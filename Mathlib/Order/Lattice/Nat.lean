@@ -47,11 +47,8 @@ theorem _root_.Set.Infinite.Nat.sSup_eq_zero {s : Set ℕ} (h : s.Infinite) : sS
     let ⟨k, hks, hk⟩ := h.exists_gt n
     (hn k hks).not_gt hk
 
-theorem sSup_of_not_bddAbove {s : Set ℕ} (h : ¬BddAbove s) : sSup s = 0 :=
-  Set.Infinite.Nat.sSup_eq_zero <| Set.infinite_of_not_bddAbove h
-
-lemma iSup_of_not_bddAbove {ι : Sort*} {f : ι → ℕ} (h : ¬ BddAbove (Set.range f)) :
-    (⨆ i, f i : ℕ) = 0 := Nat.sSup_of_not_bddAbove h
+@[deprecated (since := "2026-08-17")] alias sSup_of_not_bddAbove := csSup_of_not_bddAbove₀
+@[deprecated (since := "2026-08-17")] alias iSup_of_not_bddAbove := ciSup_of_not_bddAbove₀
 
 set_option backward.isDefEq.respectTransparency.types false in
 @[simp]
@@ -60,17 +57,13 @@ theorem sInf_eq_zero {s : Set ℕ} : sInf s = 0 ↔ 0 ∈ s ∨ s = ∅ := by
   · simp [sInf]
   · simp [h, h.ne_empty, Nat.sInf_def]
 
-@[simp]
-theorem sInf_empty : sInf ∅ = 0 := by
-  simp
+instance instInfSetEmptyZero : InfSetEmptyZero ℕ where
+  sInf_empty := by simp
 
-theorem iInf_of_empty {ι : Sort*} [IsEmpty ι] (f : ι → ℕ) : iInf f = 0 := by
-  simp
+@[deprecated (since := "2026-08-17")] alias sInf_empty := sInf_empty_eq_zero
 
-/-- This combines `Nat.iInf_of_empty` with `ciInf_const`. -/
-@[simp]
-lemma iInf_const_zero {ι : Sort*} : ⨅ _ : ι, 0 = 0 :=
-  (isEmpty_or_nonempty ι).elim (fun h ↦ by simp) fun h ↦ sInf_eq_zero.2 <| by simp
+@[deprecated (since := "2026-08-17")] alias iInf_of_empty := iInf_of_empty₀
+@[deprecated (since := "2026-08-17")] alias iInf_const_zero := iInf_const_zero₀
 
 theorem sInf_mem {s : Set ℕ} (h : s.Nonempty) : sInf s ∈ s := by
   classical
@@ -150,7 +143,7 @@ theorem sInf_add {n : ℕ} {p : ℕ → Prop} (hn : n ≤ sInf { m | p m }) :
     sInf { m | p (m + n) } + n = sInf { m | p m } := by
   classical
   obtain h | ⟨m, hm⟩ := { m | p (m + n) }.eq_empty_or_nonempty
-  · rw [h, Nat.sInf_empty, zero_add]
+  · rw [h, sInf_empty_eq_zero, zero_add]
     obtain hnp | hnp := hn.eq_or_lt
     · exact hnp
     suffices hp : p (sInf { m | p m } - n + n) from (h.subset hp).elim

@@ -113,16 +113,14 @@ lemma sInf_eq_zero_iff {s : Set Cardinal} : sInf s = 0 ↔ s = ∅ ∨ ∃ a ∈
     · exact Or.inl rfl
     · exact Or.inr ⟨sInf s, csInf_mem hne, h⟩
   · rcases h with rfl | ⟨a, ha, rfl⟩
-    · exact Cardinal.sInf_empty
+    · exact sInf_empty_eq_zero
     · exact eq_bot_iff.2 (csInf_le' ha)
 
 lemma iInf_eq_zero_iff {ι : Sort*} {f : ι → Cardinal} :
     (⨅ i, f i) = 0 ↔ IsEmpty ι ∨ ∃ i, f i = 0 := by
   simp [iInf, sInf_eq_zero_iff]
 
-/-- A variant of `ciSup_of_empty` but with `0` on the RHS for convenience -/
-protected theorem iSup_of_empty {ι} (f : ι → Cardinal) [IsEmpty ι] : iSup f = 0 :=
-  ciSup_of_empty f
+@[deprecated (since := "2026-08-17")] protected alias iSup_of_empty := iSup_of_empty₀
 
 @[simp]
 theorem lift_sInf (s : Set Cardinal) : lift.{u, v} (sInf s) = sInf (lift.{u, v} '' s) := by
@@ -1045,7 +1043,7 @@ theorem zero_powerlt {a : Cardinal} (h : a ≠ 0) : 0 ^< a = 1 := by
 
 @[simp]
 theorem powerlt_zero {a : Cardinal} : a ^< 0 = 0 := by
-  convert! Cardinal.iSup_of_empty _
+  convert! iSup_of_empty₀ (α := Cardinal) _
   exact Subtype.isEmpty_of_false fun x => mem_Iio.not.mpr not_lt_zero
 
 /-- The cardinality of a set is an upper-bound for the amount of elements before the set's mex

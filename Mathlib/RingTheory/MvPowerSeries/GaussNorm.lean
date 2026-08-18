@@ -117,7 +117,7 @@ lemma gaussNorm_add_le_max (f g : MvPowerSeries σ R) (hc : 0 ≤ c)
         exact mul_le_mul_of_nonneg (by aesop) (by aesop) (by aesop) (H t)
       simp_rw [this]
       exact mul_le_mul_of_nonneg (by aesop) (by aesop) (by aesop) (H t)
-  refine Real.iSup_le ?_ ?_
+  refine iSup_le₀ ?_ ?_
   · refine fun t ↦ calc
     _ ≤ _ := Final t
     _ ≤ max (gaussNorm v c f) (gaussNorm v c g) := by
@@ -140,7 +140,7 @@ lemma gaussNorm_mul_le (f g : MvPowerSeries σ R) (hc : 0 ≤ c) (vNonneg : ∀ 
     (vZero : v 0 = 0) (hbfd : HasGaussNorm v c f) (hbgd : HasGaussNorm v c g) :
     gaussNorm v c (f * g) ≤ gaussNorm v c f * gaussNorm v c g := by
   classical
-  refine Real.iSup_le ?_ ?_
+  refine iSup_le₀ ?_ ?_
   · intro t
     obtain ⟨k, hk, hsum⟩ := vna.finset_image_add _ (Finset.antidiagonal t)
       (fun x ↦ vZero.le.trans (vNonneg x))

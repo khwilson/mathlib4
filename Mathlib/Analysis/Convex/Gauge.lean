@@ -93,7 +93,7 @@ theorem gauge_zero : gauge s 0 = 0 := by
   rw [gauge_def']
   by_cases h : (0 : E) ∈ s
   · simp only [smul_zero, sep_true, h, csInf_Ioi]
-  · simp only [smul_zero, sep_false, h, Real.sInf_empty]
+  · simp only [smul_zero, sep_false, h, csInf_empty_eq_zero]
 
 @[simp]
 theorem gauge_zero' : gauge (0 : Set E) = 0 := by
@@ -102,13 +102,13 @@ theorem gauge_zero' : gauge (0 : Set E) = 0 := by
   obtain rfl | hx := eq_or_ne x 0
   · simp only [csInf_Ioi, mem_zero, Pi.zero_apply, sep_true, smul_zero]
   · simp only [mem_zero, Pi.zero_apply, inv_eq_zero, smul_eq_zero]
-    convert! Real.sInf_empty
+    convert! csInf_empty_eq_zero (α := ℝ)
     exact eq_empty_iff_forall_notMem.2 fun r hr => hr.2.elim (ne_of_gt hr.1) hx
 
 @[simp]
 theorem gauge_empty : gauge (∅ : Set E) = 0 := by
   ext
-  simp only [gauge_def', Real.sInf_empty, mem_empty_iff_false, Pi.zero_apply, sep_false]
+  simp only [gauge_def', csInf_empty_eq_zero, mem_empty_iff_false, Pi.zero_apply, sep_false]
 
 theorem gauge_of_subset_zero (h : s ⊆ 0) : gauge s = 0 := by
   obtain rfl | rfl := subset_singleton_iff_eq.1 h
@@ -116,7 +116,7 @@ theorem gauge_of_subset_zero (h : s ⊆ 0) : gauge s = 0 := by
 
 /-- The gauge is always nonnegative. -/
 theorem gauge_nonneg (x : E) : 0 ≤ gauge s x :=
-  Real.sInf_nonneg fun _ hx => hx.1.le
+  sInf_nonneg fun _ hx => hx.1.le
 
 theorem gauge_neg (symmetric : ∀ x ∈ s, -x ∈ s) (x : E) : gauge s (-x) = gauge s x := by
   have : ∀ x, -x ∈ s ↔ x ∈ s := fun x => ⟨fun h => by simpa using symmetric _ h, symmetric x⟩
@@ -538,7 +538,7 @@ end RCLike
 protected theorem Seminorm.gauge_ball (p : Seminorm ℝ E) : gauge (p.ball 0 1) = p := by
   ext x
   obtain hp | hp := { r : ℝ | 0 < r ∧ x ∈ r • p.ball 0 1 }.eq_empty_or_nonempty
-  · rw [gauge, hp, Real.sInf_empty]
+  · rw [gauge, hp, csInf_empty_eq_zero]
     by_contra h
     have hpx : 0 < p x := (apply_nonneg _ _).lt_of_ne h
     have hpx₂ : 0 < 2 * p x := mul_pos zero_lt_two hpx
@@ -587,7 +587,7 @@ theorem gauge_closure_zero : gauge (closure (0 : Set E)) = 0 := funext fun x ↦
   rcases (norm_nonneg x).eq_or_lt' with hx | hx
   · convert! csInf_Ioi (a := (0 : ℝ))
     exact Set.ext fun r ↦ and_iff_left (.inr hx)
-  · convert! Real.sInf_empty
+  · convert! csInf_empty_eq_zero (α := ℝ)
     exact eq_empty_of_forall_notMem fun r ⟨hr₀, hr⟩ ↦ hx.ne' <| hr.resolve_left hr₀.out.ne'
 
 @[simp]

@@ -274,7 +274,7 @@ theorem locallyIntegrableOn_mul_sum_Icc {m : ℕ} (ha : 0 ≤ a) {g : ℝ → �
     refine IntegrableOn.mono_set ?_ (Bornology.IsBounded.subset_Icc_sInf_sSup hK₂.isBounded)
     refine integrableOn_mul_sum_Icc _ (ha.trans h_inf) ?_
     refine hg.integrableOn_compact_subset ?_ isCompact_Icc
-    exact (Set.Icc_subset_Ici_iff (Real.sInf_le_sSup _ hK₂.bddBelow hK₂.bddAbove)).mpr h_inf
+    exact (Set.Icc_subset_Ici_iff (sInf_le_sSup₀ _ hK₂.bddBelow hK₂.bddAbove)).mpr h_inf
   · rw [Set.not_nonempty_iff_eq_empty.mp hK₃]
     exact integrableOn_empty
 

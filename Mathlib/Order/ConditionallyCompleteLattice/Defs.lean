@@ -26,6 +26,21 @@ lattices, we prefix `sInf` and `sSup` in the statements by `c`, giving `csInf` a
 For instance, `sInf_le` is a statement in complete lattices ensuring `sInf s ≤ x`,
 while `csInf_le` is the same statement in conditionally complete lattices
 with an additional assumption that `s` is bounded below.
+
+In a conditionally complete lattice, it is also common to set a default value for `sSup s`
+(resp. `sInf s`) when `s` is empty or when it is not bounded above (resp. bounded below).
+There are two very common values for this in Mathlib: `sSup ∅ = ⊥` for linear orders with
+a bottom element such as `ℝ≥0`, and `0` for rings like `ℤ` and `ℝ`. We represent these
+with `ConditionallyCompleteLatticeLinearOrderBot` and `SupSetEmptyZero`.
+
+Many statements which are true for conditionally complete lattices with a boundedness assumption
+are true with only the assumption that `sSup ∅ = 0` or `sInf ∅ = 0`. For such statements, we use
+`sInf` and `sSup` (_not_ `csInf` and `csSup`) but suffix the name with `₀` to distinguish it from
+similar statements about complete lattices.
+
+Note that we do _not_ include `ConditionallyCompleteLatticeLinearOrderTop` as the consideration of
+nonpositive elements doesn't currently occur in mathlib, but we _do_ include `InfSetEmptyZero` to
+capture `sInf ∅ = 0`.
 -/
 
 @[expose] public section
@@ -98,6 +113,34 @@ class ConditionallyCompleteLinearOrderBot (α : Type*) extends ConditionallyComp
 
 -- see Note [lower instance priority]
 attribute [instance 100] ConditionallyCompleteLinearOrderBot.toOrderBot
+
+/-- An instance of `SupSet` where the value for the empty set is `0` -/
+class SupSetEmptyZero (α : Type*) [Zero α] [SupSet α] where
+  sSup_empty : sSup (∅ : Set α) = 0
+
+/-- An instance of `InfSet` where the value for the empty set is `0` -/
+@[to_dual existing]
+class InfSetEmptyZero (α : Type*) [Zero α] [InfSet α] where
+  sInf_empty : sInf (∅ : Set α) = 0
+
+@[to_dual (attr := simp)]
+lemma sSup_empty_eq_zero [Zero α] [SupSet α] [SupSetEmptyZero α] : sSup (∅ : Set α) = 0 :=
+  SupSetEmptyZero.sSup_empty
+
+/-- In a conditionally complete linear order whose bottom element is `0` (e.g. `ℕ`), the supremum
+of the empty set is `0`. -/
+instance ConditionallyCompleteLinearOrderBot.instSupSetEmptyZeroOfIsBotZeroClass {α : Type*}
+    [ConditionallyCompleteLinearOrderBot α] [Zero α] [IsBotZeroClass α] : SupSetEmptyZero α where
+  sSup_empty := csSup_empty.trans bot_eq_zero
+
+section Zero
+variable [ConditionallyCompleteLinearOrder α] [Zero α] {s : Set α}
+
+@[to_dual csInf_of_not_bddBelow₀]
+lemma csSup_of_not_bddAbove₀ [SupSetEmptyZero α] (hs : ¬BddAbove s) : sSup s = 0 :=
+  (ConditionallyCompleteLinearOrder.csSup_of_not_bddAbove s hs).trans sSup_empty_eq_zero
+
+end Zero
 
 /-- Create a `ConditionallyCompleteLattice` from a `PartialOrder` and `sup` function
 that returns the least upper bound of a nonempty set which is bounded above. Usually this

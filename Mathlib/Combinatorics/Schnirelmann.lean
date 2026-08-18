@@ -60,7 +60,7 @@ section
 variable {A : Set ℕ} [DecidablePred (· ∈ A)]
 
 lemma schnirelmannDensity_nonneg : 0 ≤ schnirelmannDensity A :=
-  Real.iInf_nonneg (fun _ => by positivity)
+  iInf_nonneg₀ (fun _ => by positivity)
 
 lemma schnirelmannDensity_le_div {n : ℕ} (hn : n ≠ 0) :
     schnirelmannDensity A ≤ #{a ∈ Ioc 0 n | a ∈ A} / n :=

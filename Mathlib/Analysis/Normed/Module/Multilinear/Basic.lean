@@ -373,7 +373,7 @@ theorem isLeast_opNorm (f : ContinuousMultilinearMap 𝕜 E G) :
   exact isClosed_Ici.inter (isClosed_iInter fun m ↦ isClosed_le continuous_const (by fun_prop))
 
 theorem opNorm_nonneg (f : ContinuousMultilinearMap 𝕜 E G) : 0 ≤ ‖f‖ :=
-  Real.sInf_nonneg fun _ ⟨hx, _⟩ => hx
+  sInf_nonneg fun _ ⟨hx, _⟩ => hx
 
 /-- The fundamental property of the operator norm of a continuous multilinear map:
 `‖f m‖` is bounded by `‖f‖` times the product of the `‖m i‖`. -/

@@ -247,7 +247,7 @@ theorem ramificationIdx'_le_ramificationIdx' {T : Type*} [CommRing T] [Algebra R
     [Algebra S T] [IsScalarTower R S T] (Q : Ideal T) (hp : p = comap f P)
     (h : ramificationIdx' p Q ≠ 0) : ramificationIdx' P Q ≤ ramificationIdx' p Q := by
   simp_rw [ramificationIdx', Ne] at *
-  refine csSup_le_csSup' (h.imp_symm Nat.sSup_of_not_bddAbove) fun n hn ↦ ?_
+  refine csSup_le_csSup' (h.imp_symm csSup_of_not_bddAbove₀) fun n hn ↦ ?_
   simp_rw [hp, IsScalarTower.algebraMap_eq R S T, ← map_map, map_le_iff_le_comap]
   exact comap_mono <| by rwa [← map_le_iff_le_comap]
 

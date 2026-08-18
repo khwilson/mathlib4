@@ -160,6 +160,13 @@ instance (priority := 100) CompleteLattice.toConditionallyCompleteLattice [Compl
   isLUB_csSup _ _ _ := isLUB_sSup _
   isGLB_csInf _ _ _ := isGLB_sInf _
 
+/-- In a complete lattice whose bottom element is `0` (e.g. `ℝ≥0∞`), the supremum of the empty set
+is `0`. Unlike `ConditionallyCompleteLinearOrderBot.instSupSetEmptyZeroOfIsBotZeroClass`, this does
+not require the order to be linear. -/
+instance CompleteLattice.instSupSetEmptyZeroOfIsBotZeroClass {α : Type*} [CompleteLattice α]
+    [Zero α] [IsBotZeroClass α] : SupSetEmptyZero α where
+  sSup_empty := sSup_empty.trans bot_eq_zero
+
 -- see Note [lower instance priority]
 instance (priority := 100) CompleteLinearOrder.toConditionallyCompleteLinearOrderBot {α : Type*}
     [h : CompleteLinearOrder α] : ConditionallyCompleteLinearOrderBot α where
@@ -338,6 +345,37 @@ theorem csSup_eq_of_is_forall_le_of_forall_le_imp_ge (hs : s.Nonempty) (h_is_ub 
     (h_b_le_ub : ∀ ub, (∀ a ∈ s, a ≤ ub) → b ≤ ub) : sSup s = b :=
   (csSup_le hs h_is_ub).antisymm ((h_b_le_ub _) fun _ => le_csSup ⟨b, h_is_ub⟩)
 
+section Zero
+variable [Zero α]
+
+/-- As `sSup s = 0` when `s` is empty, it suffices to show that all elements of `s` are at most
+some nonnegative number `a` to show that `sSup s ≤ a`.
+
+See also `csSup_le`. -/
+@[to_dual le_sInf₀
+/-- As `sInf s = 0` when `s` is empty, it suffices to show that all elements of `s` are at least
+some nonpositive number `a` to show that `a ≤ sInf s`.
+
+See also `le_csInf`. -/]
+lemma sSup_le₀ [SupSetEmptyZero α] (hs : ∀ x ∈ s, x ≤ a) (ha : 0 ≤ a) : sSup s ≤ a := by
+  obtain rfl | hs' := s.eq_empty_or_nonempty
+  exacts [sSup_empty_eq_zero.trans_le ha, csSup_le hs' hs]
+
+/-- As `sSup s = 0` when `s` is empty, it suffices to show that all elements of `s` are nonpositive
+to show that `sSup s ≤ 0`. -/
+@[to_dual sInf_nonneg₀
+/-- As `sInf s = 0` when `s` is empty, it suffices to show that all elements of `s` are nonnegative
+to show that `0 ≤ sInf s`. -/]
+lemma sSup_nonpos₀ [SupSetEmptyZero α] (hs : ∀ x ∈ s, x ≤ 0) : sSup s ≤ 0 := sSup_le₀ hs le_rfl
+
+lemma sInf_le_sSup₀ [SupSetEmptyZero α] [InfSetEmptyZero α] (s : Set α) (h₁ : BddBelow s)
+    (h₂ : BddAbove s) : sInf s ≤ sSup s := by
+  rcases s.eq_empty_or_nonempty with (rfl | hne)
+  · rw [sInf_empty_eq_zero, sSup_empty_eq_zero]
+  · exact csInf_le_csSup hne h₁ h₂
+
+end Zero
+
 end ConditionallyCompleteLattice
 
 instance Pi.conditionallyCompleteLattice {ι : Type*} {α : ι → Type*}
@@ -443,6 +481,31 @@ theorem csSup_eq_top_of_top_mem [OrderTop α] {s : Set α} (hs : ⊤ ∈ s) : sS
 
 open Function
 
+section Zero
+variable [Zero α]
+
+/-- As `sSup s = 0` when `s` is unbounded above, it suffices to show that `s` contains a
+nonnegative element to show that `0 ≤ sSup s`. -/
+@[to_dual sInf_nonpos_of_exists₀
+/-- As `sInf s = 0` when `s` is unbounded below, it suffices to show that `s` contains a
+nonpositive element to show that `sInf s ≤ 0`. -/]
+lemma sSup_nonneg_of_exists₀ [SupSetEmptyZero α] (hs : ∃ x ∈ s, 0 ≤ x) : 0 ≤ sSup s := by
+  classical
+  obtain ⟨x, hxs, hx⟩ := hs
+  exact dite _ (fun h ↦ le_csSup_of_le h hxs hx) fun h ↦ (csSup_of_not_bddAbove₀ h).ge
+
+/-- As `sSup s = 0` when `s` is either empty or unbounded above, it suffices to show that all
+elements of `s` are nonnegative to show that `0 ≤ sSup s`. -/
+@[to_dual sInf_nonpos₀
+/-- As `sInf s = 0` when `s` is either empty or unbounded below, it suffices to show that all
+elements of `s` are nonpositive to show that `sInf s ≤ 0`. -/]
+lemma sSup_nonneg₀ [SupSetEmptyZero α] (hs : ∀ x ∈ s, 0 ≤ x) : 0 ≤ sSup s := by
+  obtain rfl | ⟨x, hx⟩ := s.eq_empty_or_nonempty
+  · exact sSup_empty_eq_zero.ge
+  · exact sSup_nonneg_of_exists₀ ⟨x, hx, hs _ hx⟩
+
+end Zero
+
 variable [WellFoundedLT α]
 
 theorem sInf_eq_argmin_on (hs : s.Nonempty) : sInf s = argminOn id s hs :=
@@ -482,7 +545,6 @@ end ConditionallyCompleteLinearOrder
 
 In this case we have `Sup ∅ = ⊥`, so we can drop some `Nonempty`/`Set.Nonempty` assumptions.
 -/
-
 
 section ConditionallyCompleteLinearOrderBot
 
@@ -805,7 +867,6 @@ the empty set.
 
 This result can be used to show that the extended reals `[-∞, ∞]` are a complete linear order.
 -/
-
 
 /-- Adding a top element to a conditionally complete lattice
 gives a conditionally complete lattice -/

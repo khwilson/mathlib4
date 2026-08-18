@@ -25,6 +25,20 @@ open Function OrderDual Set
 
 variable {α β γ : Type*} {ι : Sort*}
 
+section SupSet
+variable [SupSet α] [Zero α] [SupSetEmptyZero α]
+
+@[to_dual]
+lemma iSup_of_empty₀ [IsEmpty ι] (f : ι → α) : ⨆ i, f i = 0 := by
+  rw [iSup_of_empty', sSup_empty_eq_zero]
+
+end SupSet
+
+@[to_dual]
+instance Pi.instSupSetEmptyZero {ι : Type*} {β : ι → Type*} [∀ i, Zero (β i)] [∀ i, SupSet (β i)]
+    [∀ i, SupSetEmptyZero (β i)] : SupSetEmptyZero (∀ i, β i) where
+  sSup_empty := funext fun i ↦ by rw [sSup_apply]; exact iSup_of_empty₀ _
+
 section
 
 /-!
@@ -417,6 +431,36 @@ theorem ciSup_and {p q : Prop} {f : p ∧ q → α} : ⨆ ih, f ih = ⨆ (h₁) 
 theorem ciInf_and {p q : Prop} {f : p ∧ q → α} : ⨅ ih, f ih = ⨅ (h₁) (h₂), f ⟨h₁, h₂⟩ :=
   ciSup_and (α := αᵒᵈ)
 
+section Zero
+variable [Zero α] {f : ι → α}
+
+@[to_dual (attr := simp)]
+lemma iSup_const_zero₀ [SupSetEmptyZero α] : ⨆ _ : ι, (0 : α) = 0 := by
+  cases isEmpty_or_nonempty ι
+  · exact iSup_of_empty₀ _
+  · exact ciSup_const
+
+/-- As `⨆ i, f i = 0` when the domain of `f` is empty, it suffices to show that all values of `f`
+are at most some nonnegative number `a` to show that `⨆ i, f i ≤ a`.
+
+See also `ciSup_le`. -/
+@[to_dual le_iInf₀
+/-- As `⨅ i, f i = 0` when the domain of `f` is empty, it suffices to show that all values of `f`
+are at least some nonpositive number `a` to show that `a ≤ ⨅ i, f i`.
+
+See also `le_ciInf`. -/]
+lemma iSup_le₀ [SupSetEmptyZero α] (hf : ∀ i, f i ≤ a) (ha : 0 ≤ a) : ⨆ i, f i ≤ a :=
+  sSup_le₀ (Set.forall_mem_range.2 hf) ha
+
+/-- As `⨆ i, f i = 0` when the domain of `f` is empty, it suffices to show that all values of `f`
+are nonpositive to show that `⨆ i, f i ≤ 0`. -/
+@[to_dual iInf_nonneg₀
+/-- As `⨅ i, f i = 0` when the domain of `f` is empty, it suffices to show that all values of `f`
+are nonnegative to show that `0 ≤ ⨅ i, f i`. -/]
+lemma iSup_nonpos₀ [SupSetEmptyZero α] (hf : ∀ i, f i ≤ 0) : ⨆ i, f i ≤ 0 := iSup_le₀ hf le_rfl
+
+end Zero
+
 end ConditionallyCompleteLattice
 
 section ConditionallyCompleteLinearOrder
@@ -495,6 +539,39 @@ theorem ciSup_eq_top_of_top_mem [OrderTop α] {f : ι → α} (hs : ⊤ ∈ rang
 
 @[deprecated (since := "2026-04-05")] alias ciInf_eq_top_of_top_mem := ciSup_eq_top_of_top_mem
 
+section Zero
+
+/-!
+### Lemmas about a conditionally complete linear order with `sSup ∅ = 0` and `sInf ∅ = 0`
+
+In mathlib, it's common for conditionally complete linear orders to set the value of the
+supremum or infimum of the empty set to `0`, e.g., for `ℕ`, `ℝ`, `ℝ≥0`, and `ℤ`. We prove sever
+useful facts in this case.
+-/
+variable [Zero α] {f : ι → α}
+
+@[to_dual ciInf_of_not_bddBelow₀]
+lemma ciSup_of_not_bddAbove₀ [SupSetEmptyZero α] (hf : ¬BddAbove (Set.range f)) : ⨆ i, f i = 0 :=
+  csSup_of_not_bddAbove₀ hf
+
+/-- As `⨆ i, f i = 0` when `f` is unbounded above, it suffices to show that `f` takes a
+nonnegative value to show that `0 ≤ ⨆ i, f i`. -/
+@[to_dual iInf_nonpos_of_exists₀
+/-- As `⨅ i, f i = 0` when `f` is unbounded below, it suffices to show that `f` takes a
+nonpositive value to show that `⨅ i, f i ≤ 0`. -/]
+lemma iSup_nonneg_of_exists₀ [SupSetEmptyZero α] (hf : ∃ i, 0 ≤ f i) : 0 ≤ ⨆ i, f i :=
+  sSup_nonneg_of_exists₀ <| Set.exists_range_iff.2 hf
+
+/-- As `⨆ i, f i = 0` when the domain of `f` is empty or `f` is unbounded above, it suffices to
+show that all values of `f` are nonnegative to show that `0 ≤ ⨆ i, f i`. -/
+@[to_dual iInf_nonpos₀
+/-- As `⨅ i, f i = 0` when the domain of `f` is empty or `f` is unbounded below, it suffices to
+show that all values of `f` are nonpositive to show that `⨅ i, f i ≤ 0`. -/]
+lemma iSup_nonneg₀ [SupSetEmptyZero α] (hf : ∀ i, 0 ≤ f i) : 0 ≤ ⨆ i, f i :=
+  sSup_nonneg₀ <| Set.forall_mem_range.2 hf
+
+end Zero
+
 variable [WellFoundedLT α]
 
 theorem ciInf_mem [Nonempty ι] (f : ι → α) : iInf f ∈ range f :=
@@ -516,7 +593,6 @@ end ConditionallyCompleteLinearOrder
 
 In this case we have `Sup ∅ = ⊥`, so we can drop some `Nonempty`/`Set.Nonempty` assumptions.
 -/
-
 
 section ConditionallyCompleteLinearOrderBot
 

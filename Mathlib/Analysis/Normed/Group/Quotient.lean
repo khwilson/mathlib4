@@ -373,7 +373,7 @@ theorem IsQuotient.norm_lift {f : NormedAddGroupHom M N} (hquot : IsQuotient f) 
   have nonemp : ((fun m' => ‖m + m'‖) '' f.ker).Nonempty := by
     rw [Set.image_nonempty]
     exact ⟨0, f.ker.zero_mem⟩
-  rcases Real.lt_sInf_add_pos nonemp hε
+  rcases lt_sInf_add_pos nonemp hε
     with ⟨_, ⟨⟨x, hx, rfl⟩, H : ‖m + x‖ < sInf ((fun m' : M => ‖m + m'‖) '' f.ker) + ε⟩⟩
   exact ⟨m + x, by rw [map_add, (NormedAddGroupHom.mem_ker f x).mp hx, add_zero], by
     rwa [hquot.norm]⟩

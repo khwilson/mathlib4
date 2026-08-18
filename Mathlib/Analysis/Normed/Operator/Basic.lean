@@ -215,7 +215,7 @@ theorem opNorm_eq_of_bounds {φ : E →SL[σ₁₂] F} {M : ℝ} (M_nonneg : 0 �
 theorem opNorm_neg (f : E →SL[σ₁₂] F) : ‖-f‖ = ‖f‖ := by simp only [norm_def, neg_apply, norm_neg]
 
 theorem opNorm_nonneg (f : E →SL[σ₁₂] F) : 0 ≤ ‖f‖ :=
-  Real.sInf_nonneg fun _ ↦ And.left
+  sInf_nonneg fun _ ↦ And.left
 
 /-- The norm of the `0` operator is `0`. -/
 theorem opNorm_zero : ‖(0 : E →SL[σ₁₂] F)‖ = 0 :=

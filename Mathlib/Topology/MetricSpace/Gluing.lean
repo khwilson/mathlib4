@@ -103,7 +103,7 @@ theorem glueDist_swap (Φ : Z → X) (Ψ : Z → Y) (ε : ℝ) :
 
 theorem le_glueDist_inl_inr (Φ : Z → X) (Ψ : Z → Y) (ε : ℝ) (x y) :
     ε ≤ glueDist Φ Ψ ε (.inl x) (.inr y) :=
-  le_add_of_nonneg_left <| Real.iInf_nonneg fun _ => by positivity
+  le_add_of_nonneg_left <| iInf_nonneg fun _ => by positivity
 
 theorem le_glueDist_inr_inl (Φ : Z → X) (Ψ : Z → Y) (ε : ℝ) (x y) :
     ε ≤ glueDist Φ Ψ ε (.inr x) (.inl y) := by

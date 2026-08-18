@@ -490,7 +490,7 @@ noncomputable instance instSupSet : SupSet (Seminorm 𝕜 E) where
     if h : BddAbove ((↑) '' s : Set (E → ℝ)) then
       { toFun := ⨆ p : s, ((p : Seminorm 𝕜 E) : E → ℝ)
         map_zero' := by
-          rw [iSup_apply, ← @Real.iSup_const_zero s]
+          rw [iSup_apply, ← ciSup_const_zero (ι := s) (α := ℝ)]
           congr!
           rename_i _ _ _ i
           exact map_zero i.1
@@ -559,7 +559,7 @@ protected theorem iSup_apply {ι : Sort*} {p : ι → Seminorm 𝕜 E}
 
 protected theorem sSup_empty : sSup (∅ : Set (Seminorm 𝕜 E)) = ⊥ := by
   ext
-  rw [Seminorm.sSup_apply bddAbove_empty, Real.iSup_of_isEmpty]
+  rw [Seminorm.sSup_apply bddAbove_empty, ciSup_of_empty₀]
   rfl
 
 set_option backward.privateInPublic true in

@@ -134,7 +134,7 @@ variable [PseudoMetricSpace β]
 noncomputable instance [BoundedSpace β] : PseudoMetricSpace (α →ᵤ β) :=
   PseudoEMetricSpace.toPseudoMetricSpaceOfDist
     (fun f g ↦ ⨆ x, dist (toFun f x) (toFun g x))
-    (fun _ _ ↦ Real.iSup_nonneg fun i ↦ dist_nonneg)
+    (fun _ _ ↦ iSup_nonneg fun i ↦ dist_nonneg)
     fun f g ↦ by
       cases isEmpty_or_nonempty α
       · simp [edist_def]
@@ -289,7 +289,7 @@ variable [Finite 𝔖] [PseudoMetricSpace β]
 noncomputable instance [BoundedSpace β] : PseudoMetricSpace (α →ᵤ[𝔖] β) :=
   PseudoEMetricSpace.toPseudoMetricSpaceOfDist
     (fun f g ↦ ⨆ x : ⋃₀ 𝔖, dist (toFun 𝔖 f x) (toFun 𝔖 g x))
-    (fun _ _ ↦ Real.iSup_nonneg fun i ↦ dist_nonneg)
+    (fun _ _ ↦ iSup_nonneg fun i ↦ dist_nonneg)
     fun f g ↦ by
       cases isEmpty_or_nonempty (⋃₀ 𝔖)
       · simp_all [edist_def]

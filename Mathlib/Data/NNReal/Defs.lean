@@ -455,12 +455,12 @@ theorem coe_sSup (s : Set ℝ≥0) : (↑(sSup s) : ℝ) = sSup (((↑) : ℝ≥
   · simp
   by_cases H : BddAbove s
   · have A : sSup (Subtype.val '' s) ∈ Set.Ici 0 := by
-      apply Real.sSup_nonneg
+      apply sSup_nonneg₀ (α := ℝ)
       rintro - ⟨y, -, rfl⟩
       exact y.2
     exact (@subset_sSup_of_within ℝ (Set.Ici (0 : ℝ)) _ _ (_) s hs H A).symm
   · simp only [csSup_of_not_bddAbove H, csSup_empty, bot_eq_zero', NNReal.coe_zero]
-    apply (Real.sSup_of_not_bddAbove ?_).symm
+    apply (csSup_of_not_bddAbove₀ ?_).symm
     contrapose H
     exact bddAbove_coe.1 H
 
@@ -471,17 +471,18 @@ theorem coe_iSup {ι : Sort*} (s : ι → ℝ≥0) : (↑(⨆ i, s i) : ℝ) = �
 @[norm_cast]
 theorem coe_sInf (s : Set ℝ≥0) : (↑(sInf s) : ℝ) = sInf (((↑) : ℝ≥0 → ℝ) '' s) := by
   rcases Set.eq_empty_or_nonempty s with rfl | hs
-  · simp only [Set.image_empty, Real.sInf_empty, coe_eq_zero]
+  · simp only [Set.image_empty, sInf_empty_eq_zero, coe_eq_zero]
     exact @subset_sInf_emptyset ℝ (Set.Ici (0 : ℝ)) _ _ (_)
   have A : sInf (Subtype.val '' s) ∈ Set.Ici 0 := by
-    apply Real.sInf_nonneg
+    apply sInf_nonneg₀ (α := ℝ)
     rintro - ⟨y, -, rfl⟩
     exact y.2
   exact (@subset_sInf_of_within ℝ (Set.Ici (0 : ℝ)) _ _ (_) s hs (OrderBot.bddBelow s) A).symm
 
-@[simp]
-theorem sInf_empty : sInf (∅ : Set ℝ≥0) = 0 := by
-  rw [← coe_eq_zero, coe_sInf, Set.image_empty, Real.sInf_empty]
+instance instInfSetEmptyZero : InfSetEmptyZero ℝ≥0 where
+  sInf_empty := by rw [← coe_eq_zero, coe_sInf, Set.image_empty, sInf_empty_eq_zero]
+
+@[deprecated (since := "2026-08-17")] alias sInf_empty := sInf_empty_eq_zero
 
 @[norm_cast]
 theorem coe_iInf {ι : Sort*} (s : ι → ℝ≥0) : (↑(⨅ i, s i) : ℝ) = ⨅ i, ↑(s i) := by
@@ -837,26 +838,17 @@ variable {ι : Sort*} {f : ι → ℝ≥0}
 theorem le_toNNReal_of_coe_le {x : ℝ≥0} {y : ℝ} (h : ↑x ≤ y) : x ≤ y.toNNReal :=
   (le_toNNReal_iff_coe_le <| x.2.trans h).2 h
 
-nonrec theorem sSup_of_not_bddAbove {s : Set ℝ≥0} (hs : ¬BddAbove s) : SupSet.sSup s = 0 := by
-  grind [csSup_of_not_bddAbove, csSup_empty, bot_eq_zero']
-
-theorem iSup_of_not_bddAbove (hf : ¬BddAbove (range f)) : ⨆ i, f i = 0 :=
-  sSup_of_not_bddAbove hf
-
-theorem iSup_empty [IsEmpty ι] (f : ι → ℝ≥0) : ⨆ i, f i = 0 := ciSup_of_empty f
-
-theorem iInf_empty [IsEmpty ι] (f : ι → ℝ≥0) : ⨅ i, f i = 0 := by
-  rw [_root_.iInf_of_isEmpty, sInf_empty]
+@[deprecated (since := "2026-08-17")] alias sSup_of_not_bddAbove := csSup_of_not_bddAbove₀
+@[deprecated (since := "2026-08-17")] alias iSup_of_not_bddAbove := ciSup_of_not_bddAbove₀
+@[deprecated (since := "2026-08-17")] alias iSup_empty := iSup_of_empty₀
+@[deprecated (since := "2026-08-17")] alias iInf_empty := iInf_of_empty₀
 
 @[simp] lemma iSup_eq_zero (hf : BddAbove (range f)) : ⨆ i, f i = 0 ↔ ∀ i, f i = 0 := by
   cases isEmpty_or_nonempty ι
   · simp
   · simp [← bot_eq_zero', ← le_bot_iff, ciSup_le_iff hf]
 
-@[simp]
-theorem iInf_const_zero {α : Sort*} : ⨅ _ : α, (0 : ℝ≥0) = 0 := by
-  rw [← coe_inj, coe_iInf]
-  exact Real.iInf_const_zero
+@[deprecated (since := "2026-08-17")] alias iInf_const_zero := iInf_const_zero₀
 
 end Csupr
 

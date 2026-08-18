@@ -176,7 +176,7 @@ lemma exists_isMIntegralCurve_of_isMIntegralCurveOn [BoundarylessManifold I M]
   -- we will obtain two integral curves, one centred at some `t₀ > 0` with
   -- `0 ≤ asup - ε < t₀ < asup`; let `t₀ = asup - ε / 2`
   -- another centred at 0 with domain up to `a ∈ S` with `t₀ < a < asup`
-  obtain ⟨a, ha, hlt⟩ := Real.add_neg_lt_sSup (⟨ε, h x⟩ : Set.Nonempty s) (ε := - (ε / 2))
+  obtain ⟨a, ha, hlt⟩ := add_neg_lt_sSup (⟨ε, h x⟩ : Set.Nonempty s) (ε := - (ε / 2))
     (by rw [neg_lt, neg_zero]; exact half_pos hε)
   rw [mem_ofPred] at ha
   rw [← hasup, ← sub_eq_add_neg] at hlt

@@ -703,7 +703,7 @@ theorem ediam_eq {s : Set ℝ} (h : Bornology.IsBounded s) :
 /-- For a bounded set `s : Set ℝ`, its `Metric.diam` is equal to `sSup s - sInf s`. -/
 theorem diam_eq {s : Set ℝ} (h : Bornology.IsBounded s) : Metric.diam s = sSup s - sInf s := by
   rw [Metric.diam, Real.ediam_eq h, ENNReal.toReal_ofReal]
-  exact sub_nonneg.2 (Real.sInf_le_sSup s h.bddBelow h.bddAbove)
+  exact sub_nonneg.2 (sInf_le_sSup₀ s h.bddBelow h.bddAbove)
 
 @[simp]
 theorem ediam_Ioo (a b : ℝ) : Metric.ediam (Ioo a b) = ENNReal.ofReal (b - a) := by

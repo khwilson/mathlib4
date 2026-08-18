@@ -16,9 +16,7 @@ The integers form a conditionally complete linear order.
 
 public section
 
-
 open Int
-
 
 noncomputable section
 
@@ -53,12 +51,12 @@ theorem csSup_eq_greatestOfBdd {s : Set ℤ} [DecidablePred (· ∈ s)] (b : ℤ
   simp only [sSup, dite_eq_left this]
   convert! (coe_greatestOfBdd_eq Hb (Classical.choose_spec (⟨b, Hb⟩ : BddAbove s)) Hinh).symm
 
-@[simp]
-theorem csSup_empty : sSup (∅ : Set ℤ) = 0 :=
-  dite_eq_right (by simp)
+instance instSupSetEmptyZero : SupSetEmptyZero ℤ where
+  sSup_empty := dite_eq_right (by simp)
 
-theorem csSup_of_not_bddAbove {s : Set ℤ} (h : ¬BddAbove s) : sSup s = 0 :=
-  dite_eq_right (by simp [h])
+@[deprecated (since := "2026-08-17")] alias csSup_empty := sSup_empty_eq_zero
+
+@[deprecated (since := "2026-08-17")] alias csSup_of_not_bddAbove := csSup_of_not_bddAbove₀
 
 set_option backward.isDefEq.respectTransparency false in
 theorem csInf_eq_leastOfBdd {s : Set ℤ} [DecidablePred (· ∈ s)] (b : ℤ) (Hb : ∀ z ∈ s, b ≤ z)
@@ -67,12 +65,12 @@ theorem csInf_eq_leastOfBdd {s : Set ℤ} [DecidablePred (· ∈ s)] (b : ℤ) (
   simp only [sInf, dite_eq_left this]
   convert! (coe_leastOfBdd_eq Hb (Classical.choose_spec (⟨b, Hb⟩ : BddBelow s)) Hinh).symm
 
-@[simp]
-theorem csInf_empty : sInf (∅ : Set ℤ) = 0 :=
-  dite_eq_right (by simp)
+instance instInfSetEmptyZero : InfSetEmptyZero ℤ where
+  sInf_empty := dite_eq_right (by simp)
 
-theorem csInf_of_not_bddBelow {s : Set ℤ} (h : ¬BddBelow s) : sInf s = 0 :=
-  dite_eq_right (by simp [h])
+@[deprecated (since := "2026-08-17")] alias csInf_empty := sInf_empty_eq_zero
+
+@[deprecated (since := "2026-08-17")] alias csInf_of_not_bddBelow := csInf_of_not_bddBelow₀
 
 theorem csSup_mem {s : Set ℤ} (h1 : s.Nonempty) (h2 : BddAbove s) : sSup s ∈ s := by
   convert! (greatestOfBdd _ (Classical.choose_spec h2) h1).2.1

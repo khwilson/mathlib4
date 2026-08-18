@@ -241,8 +241,8 @@ variable (K ι ι') in
 lemma max_mulHeightBound_zero_one_eq_one :
     max (mulHeightBound (0 : ι' → MvPolynomial ι K)) 1 = 1 := by
   simp only [mulHeightBound_eq, Pi.zero_apply, support_zero, coeff_zero, AbsoluteValue.map_zero,
-    Real.iSup_of_isEmpty, zero_le_one, sup_of_le_right, AddMonoidAlgebra.coeff_zero,
-    Finsupp.sum_zero_index, Real.iSup_const_zero, Multiset.map_const', Multiset.prod_replicate,
+    ciSup_of_empty₀, zero_le_one, sup_of_le_right, AddMonoidAlgebra.coeff_zero,
+    Finsupp.sum_zero_index, ciSup_const_zero, Multiset.map_const', Multiset.prod_replicate,
     sup_eq_right, zero_pow_eq]
   rcases isEmpty_or_nonempty ι'
   · split_ifs
@@ -328,7 +328,7 @@ theorem mulHeight_eval_le {N : ℕ} {p : ι' → MvPolynomial ι K} (hp : ∀ i,
   · -- archimedean part: reduce to "local" statement `eval_mvPolynomial_le`
     rw [← prod_map_pow, ← prod_map_mul]
     refine prod_map_le_prod_map₀ _ _ (fun _ _ ↦ Real.iSup_nonneg_of_nonnegHomClass ..)
-      fun v _ ↦ Real.iSup_le (fun j ↦ ?_) <| mul_nonneg (H₀ v) (HH₁ v)
+      fun v _ ↦ iSup_le₀ (fun j ↦ ?_) <| mul_nonneg (H₀ v) (HH₁ v)
     grw [v.eval_mvPolynomial_le (hp j) x]
     gcongr
     · exact HH₁ v
@@ -338,7 +338,7 @@ theorem mulHeight_eval_le {N : ℕ} {p : ι' → MvPolynomial ι K} (hp : ∀ i,
     have F := hasFiniteMulSupport_iSup_nonarchAbsVal hx
     rw [finprod_pow F, ← finprod_mul_distrib (by fun_prop) (by fun_prop)]
     refine finprod_le_finprod (by fun_prop)
-      (fun _ ↦ Real.iSup_nonneg_of_nonnegHomClass ..) (by fun_prop) fun v ↦ Real.iSup_le
+      (fun _ ↦ Real.iSup_nonneg_of_nonnegHomClass ..) (by fun_prop) fun v ↦ iSup_le₀
       (fun j ↦ ?_) ?_
     · grw [(isNonarchimedean _ v.prop).eval_mvPolynomial_le (hp j) x]
       gcongr

@@ -108,7 +108,7 @@ namespace IsTightMeasureSet
 /-- In a compact space, every set of measures is tight. -/
 lemma of_compactSpace [CompactSpace 𝓧] : IsTightMeasureSet S := by
   simp only [IsTightMeasureSet, cocompact_eq_bot, smallSets_bot, tendsto_pure_left, iSup_apply,
-    measure_empty, ENNReal.iSup_zero, ciSup_const]
+    measure_empty, ciSup_const_zero]
   exact fun _ ↦ mem_of_mem_nhds
 
 protected lemma subset (hT : IsTightMeasureSet T) (hST : S ⊆ T) :

@@ -230,7 +230,8 @@ theorem nth_eq_sInf (p : ℕ → Prop) (n : ℕ) : nth p n = sInf {x | p x ∧ �
   · exact (isLeast_nth hn).csInf_eq.symm
   · rcases hn with ⟨hf, hn⟩
     rw [nth_of_card_le _ hn]
-    refine ((congr_arg sInf <| Set.eq_empty_of_forall_notMem fun k hk => ?_).trans sInf_empty).symm
+    refine ((congr_arg sInf <| Set.eq_empty_of_forall_notMem fun k hk => ?_).trans
+      sInf_empty_eq_zero).symm
     rcases exists_lt_card_nth_eq hk.1 with ⟨k, hlt, rfl⟩
     exact (hk.2 _ ((hlt hf).trans_le hn)).false
 

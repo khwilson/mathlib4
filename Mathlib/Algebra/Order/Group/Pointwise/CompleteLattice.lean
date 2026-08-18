@@ -7,6 +7,8 @@ module
 
 public import Mathlib.Algebra.Order.Group.Pointwise.Bounds
 public import Mathlib.Order.ConditionallyCompleteLattice.Indexed
+public import Mathlib.Order.ConditionallyCompleteLattice.Pointwise
+public import Mathlib.Order.ConditionallyCompleteLattice.Basic
 
 /-!
 # Infima/suprema in ordered monoids and groups
@@ -24,7 +26,7 @@ public section
 open Set
 open scoped Pointwise
 
-variable {M : Type*}
+variable {ι : Sort*} {M : Type*}
 
 section ConditionallyCompleteLattice
 variable [ConditionallyCompleteLattice M]
@@ -75,6 +77,60 @@ lemma csInf_div (hs₀ : s.Nonempty) (hs₁ : BddBelow s) (ht₀ : t.Nonempty) (
 
 end Group
 end ConditionallyCompleteLattice
+
+section ConditionallyCompleteLinearOrder
+variable [ConditionallyCompleteLinearOrder M]
+
+section AddGroup
+variable [AddGroup M]
+
+section AddLeftMono
+variable [AddLeftMono M] {s : Set M} {a ε : M}
+
+theorem lt_sInf_add_pos (h : s.Nonempty) (hε : 0 < ε) : ∃ a ∈ s, a < sInf s + ε :=
+  exists_lt_of_csInf_lt h <| lt_add_of_pos_right _ hε
+
+theorem add_neg_lt_sSup (h : s.Nonempty) (hε : ε < 0) : ∃ a ∈ s, sSup s + ε < a :=
+  exists_lt_of_lt_csSup h <| add_lt_iff_neg_left.2 hε
+
+theorem csInf_le_iff_forall_pos_lt_add (h : BddBelow s) (h' : s.Nonempty) :
+    sInf s ≤ a ↔ ∀ ε, 0 < ε → ∃ x ∈ s, x < a + ε := by
+  rw [le_iff_forall_pos_lt_add]
+  constructor <;> intro H ε ε_pos
+  · exact exists_lt_of_csInf_lt h' (H ε ε_pos)
+  · rcases H ε ε_pos with ⟨x, x_in, hx⟩
+    exact csInf_lt_of_lt h x_in hx
+
+variable [AddRightMono M]
+
+theorem le_csSup_iff_forall_neg_add_lt (h : BddAbove s) (h' : s.Nonempty) :
+    a ≤ sSup s ↔ ∀ ε, ε < 0 → ∃ x ∈ s, a + ε < x := by
+  rw [le_iff_forall_pos_lt_add]
+  refine ⟨fun H ε ε_neg => ?_, fun H ε ε_pos => ?_⟩
+  · refine exists_lt_of_lt_csSup h' (lt_sub_iff_add_lt.mp ?_)
+    simpa [sub_eq_add_neg] using H _ (neg_pos.mpr ε_neg)
+  · rcases H _ (neg_lt_zero.mpr ε_pos) with ⟨x, x_in, hx⟩
+    refine sub_lt_iff_lt_add.mp (lt_csSup_of_lt h x_in ?_)
+    simpa [sub_eq_add_neg] using hx
+
+variable [InfSetEmptyZero M] [SupSetEmptyZero M] (s : Set M)
+
+@[simp]
+lemma sSup_neg₀ : sSup (-s) = -sInf s := by
+  obtain rfl | hn := s.eq_empty_or_nonempty; · simp
+  by_cases hb : BddBelow s
+  · rw [csSup_neg hn hb]
+  · rw [csInf_of_not_bddBelow hb, sInf_empty_eq_zero,
+      csSup_of_not_bddAbove (bddAbove_neg.not.2 hb), sSup_empty_eq_zero, neg_zero]
+
+@[simp]
+lemma sInf_neg₀ : sInf (-s) = -sSup s := by
+  rw [← neg_eq_iff_eq_neg, ← sSup_neg₀, neg_neg]
+
+end AddLeftMono
+
+end AddGroup
+end ConditionallyCompleteLinearOrder
 
 section CompleteLattice
 variable [CompleteLattice M]

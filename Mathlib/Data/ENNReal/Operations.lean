@@ -506,7 +506,7 @@ variable {a b c d : ℝ≥0∞} {r p q : ℝ≥0}
 
 theorem toNNReal_iInf (hf : ∀ i, f i ≠ ∞) : (iInf f).toNNReal = ⨅ i, (f i).toNNReal := by
   cases isEmpty_or_nonempty ι
-  · rw [iInf_of_empty, toNNReal_top, NNReal.iInf_empty]
+  · rw [iInf_of_empty, toNNReal_top, iInf_of_empty₀ _]
   · lift f to ι → ℝ≥0 using hf
     simp_rw [← coe_iInf, toNNReal_coe]
 
@@ -527,14 +527,14 @@ theorem toReal_sInf (s : Set ℝ≥0∞) (hf : ∀ r ∈ s, r ≠ ∞) :
     ENNReal.ofReal (⨅ i, f i) = ⨅ i, ENNReal.ofReal (f i) := by
   obtain ⟨i, hi⟩ | h := em (∃ i, f i ≤ 0)
   · rw [iInf_eq_bot.2 fun _ _ ↦ ⟨i, by simpa [ofReal_of_nonpos hi]⟩]
-    simp [Real.iInf_nonpos' ⟨i, hi⟩]
+    simp [iInf_nonpos_of_exists₀ ⟨i, hi⟩]
   replace h i : 0 ≤ f i := le_of_not_ge fun hi ↦ h ⟨i, hi⟩
   refine eq_of_forall_le_iff fun a ↦ ?_
   obtain rfl | ha := eq_or_ne a ∞
   · simp
   rw [le_iInf_iff, le_ofReal_iff_toReal_le ha, le_ciInf_iff ⟨0, by simpa [mem_lowerBounds]⟩]
   · exact forall_congr' fun i ↦ (le_ofReal_iff_toReal_le ha (h _)).symm
-  · exact Real.iInf_nonneg h
+  · exact iInf_nonneg₀ h
 
 theorem iInf_add : iInf f + a = ⨅ i, f i + a :=
   le_antisymm (le_iInf fun _ => add_le_add (iInf_le _ _) <| le_rfl)
@@ -608,7 +608,7 @@ theorem toNNReal_iSup (hf : ∀ i, f i ≠ ∞) : (iSup f).toNNReal = ⨆ i, (f 
   simp_rw [toNNReal_coe]
   by_cases h : BddAbove (range f)
   · rw [← coe_iSup h, toNNReal_coe]
-  · rw [NNReal.iSup_of_not_bddAbove h, iSup_coe_eq_top.2 h, toNNReal_top]
+  · rw [ciSup_of_not_bddAbove₀ h, iSup_coe_eq_top.2 h, toNNReal_top]
 
 theorem toNNReal_sSup (s : Set ℝ≥0∞) (hs : ∀ r ∈ s, r ≠ ∞) :
     (sSup s).toNNReal = sSup (ENNReal.toNNReal '' s) := by
@@ -629,7 +629,7 @@ theorem iSup_sub : (⨆ i, f i) - a = ⨆ i, f i - a :=
 
 @[simp] lemma iSup_eq_zero : ⨆ i, f i = 0 ↔ ∀ i, f i = 0 := iSup_eq_bot
 
-@[simp] lemma iSup_zero : ⨆ _ : ι, (0 : ℝ≥0∞) = 0 := by simp
+@[deprecated (since := "2026-08-17")] alias iSup_zero := iSup_const_zero₀
 
 lemma iSup_natCast : ⨆ n : ℕ, (n : ℝ≥0∞) = ∞ :=
   iSup_eq_top.2 fun _b hb => ENNReal.exists_nat_gt (lt_top_iff_ne_top.1 hb)

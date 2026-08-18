@@ -945,7 +945,7 @@ namespace Real
 
 /-
 Note: We cannot easily generalize this to targets other than `ℝ`, because we need
-the fact that `⨆ i, f i = 0` when the indexing type is empty (`Real.iSup_of_isEmpty`).
+the fact that `⨆ i, f i = 0` when the indexing type is empty (`ciSup_of_empty₀`).
 -/
 
 section mul
@@ -962,7 +962,7 @@ end mul
 
 /-
 Note: We cannot easily generalize this to targets other than `ℝ`, because we need
-the fact that `⨆ i, f i = 0` when the indexing type is empty (`Real.iSup_of_isEmpty`).
+the fact that `⨆ i, f i = 0` when the indexing type is empty (`ciSup_of_empty₀`).
 -/
 
 section prod
@@ -974,7 +974,7 @@ variable {α R : Type*} [Fintype α] {ι : α → Type u} [∀ a, Finite (ι a)]
 lemma iSup_prod_eq_prod_iSup_of_nonneg {f : (a : α) → ι a → ℝ} (hf₀ : ∀ a i, 0 ≤ f a i) :
     ⨆ (i : (a : α) → ι a), ∏ a, f a (i a) = ∏ a, ⨆ i, f a i := by
   rcases isEmpty_or_nonempty ((a : α) → ι a) with h | h
-  · rw [iSup_of_isEmpty, eq_comm, Finset.prod_eq_zero_iff]
+  · rw [ciSup_of_empty₀, eq_comm, Finset.prod_eq_zero_iff]
     obtain ⟨a, ha⟩ := isEmpty_pi.mp h
     exact ⟨a, by simp⟩
   refine le_antisymm ?_ ?_

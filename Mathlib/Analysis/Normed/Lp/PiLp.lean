@@ -442,11 +442,11 @@ abbrev pseudoMetricAux : PseudoMetricSpace (PiLp p α) :=
     (fun f g => by
       rcases p.dichotomy with (rfl | h)
       · simp only [dist, top_ne_zero, ↓reduceIte]
-        exact Real.iSup_nonneg fun i ↦ dist_nonneg
+        exact iSup_nonneg fun i ↦ dist_nonneg
       · simp only [dist]
         split_ifs with hp
         · linarith
-        · exact Real.iSup_nonneg fun i ↦ dist_nonneg
+        · exact iSup_nonneg fun i ↦ dist_nonneg
         · exact rpow_nonneg (Fintype.sum_nonneg fun i ↦ by positivity) (1 / p.toReal))
     fun f g => by
     rcases p.dichotomy with (rfl | h)

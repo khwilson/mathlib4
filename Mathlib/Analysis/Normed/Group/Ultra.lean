@@ -320,13 +320,13 @@ theorem exists_norm_multiset_prod_le (s : Multiset ι) [Nonempty ι] {f : ι →
 lemma norm_tprod_le (f : ι → M) : ‖∏' i, f i‖ ≤ ⨆ i, ‖f i‖ := by
   rcases isEmpty_or_nonempty ι with hι | hι
   · -- Silly case #1 : the index type is empty
-    simp only [tprod_empty, norm_one', Real.iSup_of_isEmpty, le_refl]
+    simp only [tprod_empty, norm_one', ciSup_of_empty₀, le_refl]
   by_cases h : Multipliable f; swap
   · -- Silly case #2 : the product is divergent
     rw [tprod_eq_one_of_not_multipliable h, norm_one']
     by_cases h_bd : BddAbove (Set.range fun i ↦ ‖f i‖)
     · exact le_ciSup_of_le h_bd hι.some (norm_nonneg' _)
-    · rw [Real.iSup_of_not_bddAbove h_bd]
+    · rw [ciSup_of_not_bddAbove₀ h_bd]
   -- now the interesting case
   have h_bd : BddAbove (Set.range fun i ↦ ‖f i‖) :=
     h.tendsto_cofinite_one.norm'.bddAbove_range_of_cofinite

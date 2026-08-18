@@ -166,14 +166,14 @@ variable {ι : Sort*} {f : ι → ℝ≥0}
 
 theorem iInf_mul (f : ι → ℝ≥0) (a : ℝ≥0) : iInf f * a = ⨅ i, f i * a := by
   rw [← coe_inj, NNReal.coe_mul, coe_iInf, coe_iInf]
-  exact Real.iInf_mul_of_nonneg (NNReal.coe_nonneg _) _
+  exact ciInf_mul_of_nonneg (NNReal.coe_nonneg _) _
 
 theorem mul_iInf (f : ι → ℝ≥0) (a : ℝ≥0) : a * iInf f = ⨅ i, a * f i := by
   simpa only [mul_comm] using iInf_mul f a
 
 theorem mul_iSup (f : ι → ℝ≥0) (a : ℝ≥0) : (a * ⨆ i, f i) = ⨆ i, a * f i := by
   rw [← coe_inj, NNReal.coe_mul, NNReal.coe_iSup, NNReal.coe_iSup]
-  exact Real.mul_iSup_of_nonneg (NNReal.coe_nonneg _) _
+  exact mul_ciSup_of_nonneg (NNReal.coe_nonneg _) _
 
 theorem iSup_mul (f : ι → ℝ≥0) (a : ℝ≥0) : (⨆ i, f i) * a = ⨆ i, f i * a := by
   rw [mul_comm, mul_iSup]

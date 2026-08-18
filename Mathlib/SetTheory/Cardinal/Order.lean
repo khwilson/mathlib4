@@ -378,9 +378,10 @@ instance : WellFoundedLT Cardinal.{u} :=
 instance : ConditionallyCompleteLinearOrderBot Cardinal :=
   WellFoundedLT.conditionallyCompleteLinearOrderBot _
 
-@[simp]
-theorem sInf_empty : sInf (∅ : Set Cardinal.{u}) = 0 :=
-  dite_eq_right Set.not_nonempty_empty
+instance instInfSetEmptyZero : InfSetEmptyZero Cardinal.{u} where
+  sInf_empty := dite_eq_right Set.not_nonempty_empty
+
+@[deprecated (since := "2026-08-17")] alias sInf_empty := sInf_empty_eq_zero
 
 /-- Note that the successor of `c` is not the same as `c + 1` except in the case of finite `c`. -/
 @[no_expose] instance : SuccOrder Cardinal := .ofLinearWellFoundedLT _

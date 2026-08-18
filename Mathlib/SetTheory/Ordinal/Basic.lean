@@ -889,9 +889,10 @@ theorem max_zero_right : ∀ a : Ordinal, max a 0 = a :=
 protected theorem max_eq_zero {a b : Ordinal} : max a b = 0 ↔ a = 0 ∧ b = 0 :=
   max_eq_zero
 
-@[simp]
-theorem sInf_empty : sInf (∅ : Set Ordinal) = 0 :=
-  dite_eq_right Set.not_nonempty_empty
+instance instInfSetEmptyZero : InfSetEmptyZero Ordinal where
+  sInf_empty := dite_eq_right Set.not_nonempty_empty
+
+@[deprecated (since := "2026-08-17")] alias sInf_empty := sInf_empty_eq_zero
 
 /-! ### Successor order properties -/
 
