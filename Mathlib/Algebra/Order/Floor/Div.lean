@@ -198,6 +198,32 @@ lemma ceilDiv_eq_add_pred_div (a b : ℕ) : a ⌈/⌉ b = (a + b - 1) / b := rfl
 
 end Nat
 
+namespace Int
+
+instance instFloorDiv : FloorDiv ℤ ℤ where
+  floorDiv b a := if 0 < a then b / a else 0
+  floorDiv_gc a ha b c := by
+    simp only [smul_eq_mul, ha, ↓reduceIte]
+    rw [Int.le_ediv_iff_mul_le ha, Int.mul_comm]
+  floorDiv_nonpos a ha b := by simp [Int.not_lt.2 ha]
+  zero_floorDiv a := by simp
+
+instance instCeilDiv : CeilDiv ℤ ℤ where
+  ceilDiv b a := if 0 < a then -(-b / a) else 0
+  ceilDiv_gc a ha b c := by
+    simp only [smul_eq_mul, ha, ↓reduceIte]
+    rw [Int.neg_le_iff, Int.le_ediv_iff_mul_le ha, neg_mul, neg_le_neg_iff, Int.mul_comm]
+  ceilDiv_nonpos a ha b := by simp [Int.not_lt.2 ha]
+  zero_ceilDiv a := by simp
+
+@[simp] lemma floorDiv_eq_ediv (a : ℤ) {b : ℤ} (hb : 0 < b) : a ⌊/⌋ b = a / b := by
+  simp [FloorDiv.floorDiv, hb]
+
+lemma ceilDiv_eq_neg_ediv_neg (a : ℤ) {b : ℤ} (hb : 0 < b) : a ⌈/⌉ b = -(-a / b) := by
+  simp [CeilDiv.ceilDiv, hb]
+
+end Int
+
 namespace Pi
 variable {π : ι → Type*} [AddCommMonoid α] [PartialOrder α]
   [∀ i, AddCommMonoid (π i)] [∀ i, PartialOrder (π i)]

@@ -140,8 +140,8 @@ noncomputable instance : ConditionallyCompleteLinearOrder ℝ where
   csSup_of_not_bddAbove s hs := by simp [hs, sSup_def]
   csInf_of_not_bddBelow s hs := by simp [hs, sInf_def, sSup_def]
 
-@[deprecated (since := "2026-08-17")] protected alias lt_sInf_add_pos := _root_.lt_sInf_add_pos
-@[deprecated (since := "2026-08-17")] protected alias add_neg_lt_sSup := _root_.add_neg_lt_sSup
+@[deprecated (since := "2026-08-17")] alias lt_sInf_add_pos := _root_.lt_sInf_add_pos
+@[deprecated (since := "2026-08-17")] alias add_neg_lt_sSup := _root_.add_neg_lt_sSup
 @[deprecated (since := "2026-08-17")]
 alias sInf_le_iff := csInf_le_iff_forall_pos_lt_add
 @[deprecated (since := "2026-08-17")]
@@ -179,18 +179,18 @@ instance instInfSetZeroEmpty : InfSetEmptyZero ℝ where
 @[deprecated (since := "2026-08-17")] protected alias iSup_le := iSup_le₀
 @[deprecated (since := "2026-08-17")] protected alias le_sInf := le_sInf₀
 @[deprecated (since := "2026-08-17")] protected alias le_iInf := le_iInf₀
-@[deprecated (since := "2026-08-17")] protected alias sSup_nonpos := _root_.sSup_nonpos₀
-@[deprecated (since := "2026-08-17")] protected alias iSup_nonpos := _root_.iSup_nonpos₀
-@[deprecated (since := "2026-08-17")] protected alias sInf_nonneg := _root_.sInf_nonneg₀
-@[deprecated (since := "2026-08-17")] protected alias iInf_nonneg := _root_.iInf_nonneg₀
-@[deprecated (since := "2026-08-17")] protected alias sSup_nonneg' := _root_.sSup_nonneg_of_exists₀
-@[deprecated (since := "2026-08-17")] protected alias iSup_nonneg' := _root_.iSup_nonneg_of_exists₀
-@[deprecated (since := "2026-08-17")] protected alias sInf_nonpos' := _root_.sInf_nonpos_of_exists₀
-@[deprecated (since := "2026-08-17")] protected alias iInf_nonpos' := _root_.iInf_nonpos_of_exists₀
-@[deprecated (since := "2026-08-17")] protected alias sSup_nonneg := sSup_nonneg₀
-@[deprecated (since := "2026-08-17")] protected alias iSup_nonneg := _root_.iSup_nonneg₀
-@[deprecated (since := "2026-08-17")] protected alias sInf_nonpos := _root_.sInf_nonpos₀
-@[deprecated (since := "2026-08-17")] protected alias iInf_nonpos := _root_.iInf_nonpos₀
+@[deprecated (since := "2026-08-17")] alias sSup_nonpos := _root_.sSup_nonpos₀
+@[deprecated (since := "2026-08-17")] alias iSup_nonpos := _root_.iSup_nonpos₀
+@[deprecated (since := "2026-08-17")] alias sInf_nonneg := _root_.sInf_nonneg₀
+@[deprecated (since := "2026-08-17")] alias iInf_nonneg := _root_.iInf_nonneg₀
+@[deprecated (since := "2026-08-17")] alias sSup_nonneg' := _root_.sSup_nonneg_of_exists₀
+@[deprecated (since := "2026-08-17")] alias iSup_nonneg' := _root_.iSup_nonneg_of_exists₀
+@[deprecated (since := "2026-08-17")] alias sInf_nonpos' := _root_.sInf_nonpos_of_exists₀
+@[deprecated (since := "2026-08-17")] alias iInf_nonpos' := _root_.iInf_nonpos_of_exists₀
+@[deprecated (since := "2026-08-17")] alias sSup_nonneg := sSup_nonneg₀
+@[deprecated (since := "2026-08-17")] alias iSup_nonneg := _root_.iSup_nonneg₀
+@[deprecated (since := "2026-08-17")] alias sInf_nonpos := _root_.sInf_nonpos₀
+@[deprecated (since := "2026-08-17")] alias iInf_nonpos := _root_.iInf_nonpos₀
 @[deprecated (since := "2026-08-17")] alias sInf_le_sSup := sInf_le_sSup₀
 
 lemma iSup_nonneg_of_nonnegHomClass {ι F α : Type*} [FunLike F α ℝ] [NonnegHomClass F α ℝ] (f : F)

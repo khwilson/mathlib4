@@ -241,8 +241,8 @@ variable (K ι ι') in
 lemma max_mulHeightBound_zero_one_eq_one :
     max (mulHeightBound (0 : ι' → MvPolynomial ι K)) 1 = 1 := by
   simp only [mulHeightBound_eq, Pi.zero_apply, support_zero, coeff_zero, AbsoluteValue.map_zero,
-    ciSup_of_empty₀, zero_le_one, sup_of_le_right, AddMonoidAlgebra.coeff_zero,
-    Finsupp.sum_zero_index, ciSup_const_zero, Multiset.map_const', Multiset.prod_replicate,
+    iSup_of_empty₀, zero_le_one, sup_of_le_right, AddMonoidAlgebra.coeff_zero,
+    Finsupp.sum_zero_index, iSup_const_zero₀, Multiset.map_const', Multiset.prod_replicate,
     sup_eq_right, zero_pow_eq]
   rcases isEmpty_or_nonempty ι'
   · split_ifs
@@ -271,7 +271,7 @@ private lemma mulHeight_constantCoeff_le_mulHeightBound {p : ι' → MvPolynomia
   simp only [mulHeight_eq h, mulHeightBound_eq]
   gcongr
   · exact finprod_nonneg fun v ↦ Real.iSup_nonneg_of_nonnegHomClass ..
-  · exact prod_map_nonneg fun v _ ↦ iSup_nonneg fun _ ↦ sum_nonneg fun _ _ ↦ by positivity
+  · exact prod_map_nonneg fun v _ ↦ iSup_nonneg₀ fun _ ↦ sum_nonneg fun _ _ ↦ by positivity
   · have H (v : AbsoluteValue K ℝ) (j : ι') :
         v (constantCoeff (p j)) ≤ (AddMonoidAlgebra.coeff <| p j).sum fun _ c ↦ v c :=
       single_eval_le_sum _ v.map_zero (fun _ ↦ by positivity) _
@@ -306,7 +306,7 @@ theorem mulHeight_eval_le {N : ℕ} {p : ι' → MvPolynomial ι K} (hp : ∀ i,
   · grw [← le_max_right]
     simpa [h₀, mulHeight_zero] using one_le_pow₀ <| one_le_mulHeight x
   have H₀ (v : AbsoluteValue K ℝ) : 0 ≤ ⨆ j, (AddMonoidAlgebra.coeff <| p j).sum fun _ c ↦ v c :=
-    iSup_nonneg (fun j ↦ sum_nonneg' <| fun s ↦ by positivity)
+    iSup_nonneg₀ (fun j ↦ sum_nonneg' <| fun s ↦ by positivity)
   -- The following four statements are used in the `gcongr`s below.
   have H₁ :
      0 ≤ (archAbsVal.map (fun v ↦ ⨆ j, (AddMonoidAlgebra.coeff <| p j).sum fun _ c ↦ v c)).prod :=
@@ -344,7 +344,7 @@ theorem mulHeight_eval_le {N : ℕ} {p : ι' → MvPolynomial ι K} (hp : ∀ i,
       gcongr
       · exact HH₁ v.val
       · grw [← HH₂, ← le_max_left]
-    · exact mul_nonneg (iSup_nonneg fun _ ↦ by positivity) <| by simp only [HH₁]
+    · exact mul_nonneg (iSup_nonneg₀ fun _ ↦ by positivity) <| by simp only [HH₁]
 
 /-- Let `K` be a field with an admissible family of absolute values (giving rise
 to a multiplicative height).

@@ -111,7 +111,7 @@ theorem projectiveSeminorm_add_le (x y : ⨂[𝕜] i, E i) : ‖x + y‖ ≤ ‖
     ⟨p.1 + q.1, lifts_add p.2 q.2⟩ (projectiveSeminormAux_add_le p.1 q.1))
 
 theorem projectiveSeminorm_smul_le (a : 𝕜) (x : ⨂[𝕜] i, E i) : ‖a • x‖ ≤ ‖a‖ * ‖x‖ := by
-  simp only [norm_def, Real.mul_iInf_of_nonneg (norm_nonneg _)]
+  simp only [norm_def, mul_ciInf_of_nonneg (norm_nonneg _)]
   refine le_ciInf fun p ↦ ?_
   simpa [projectiveSeminormAux_smul] using
     ciInf_le_of_le (bddBelow_projectiveSemiNormAux _) ⟨_, lifts_smul p.2 a⟩ (le_refl _)
@@ -147,7 +147,7 @@ variable [NontriviallyNormedField 𝕜] [∀ i, NormedSpace 𝕜 (E i)]
 theorem norm_eval_le_projectiveSeminorm {G : Type*} [SeminormedAddCommGroup G]
     [NormedSpace 𝕜 G] (f : ContinuousMultilinearMap 𝕜 E G) (x : ⨂[𝕜] i, E i) :
     ‖lift f.toMultilinearMap x‖ ≤ ‖f‖ * ‖x‖ := by
-  rw [norm_def, mul_comm, Real.iInf_mul_of_nonneg (norm_nonneg _)]
+  rw [norm_def, mul_comm, ciInf_mul_of_nonneg (norm_nonneg _)]
   refine le_ciInf fun ⟨p, hp⟩ ↦ ?_
   rw! [← ((mem_lifts_iff x p).mp hp), ← List.sum_map_hom, ← Multiset.sum_coe]
   grw [norm_multiset_sum_le]

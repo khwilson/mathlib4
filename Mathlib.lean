@@ -969,6 +969,7 @@ public import Mathlib.Algebra.Order.Field.Subfield
 public import Mathlib.Algebra.Order.Floor.BigOperators
 public import Mathlib.Algebra.Order.Floor.Defs
 public import Mathlib.Algebra.Order.Floor.Div
+public import Mathlib.Algebra.Order.Floor.Div.Pointwise
 public import Mathlib.Algebra.Order.Floor.Extended
 public import Mathlib.Algebra.Order.Floor.Ring
 public import Mathlib.Algebra.Order.Floor.Semifield
@@ -6057,6 +6058,7 @@ public import Mathlib.Order.ConditionallyCompleteLattice.Defs
 public import Mathlib.Order.ConditionallyCompleteLattice.Finset
 public import Mathlib.Order.ConditionallyCompleteLattice.Group
 public import Mathlib.Order.ConditionallyCompleteLattice.Indexed
+public import Mathlib.Order.ConditionallyCompleteLattice.Pointwise
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Basic
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Defs
 public import Mathlib.Order.ConditionallyCompletePartialOrder.Indexed

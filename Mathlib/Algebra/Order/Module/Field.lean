@@ -36,12 +36,12 @@ instance (priority := 100) PosSMulStrictMono.toPosSMulReflectLT [MulActionWithZe
 
 end LinearOrderedSemifield
 
-section Field
-variable [Field 𝕜] [LinearOrder 𝕜] [IsStrictOrderedRing 𝕜]
+section DivisionRing
+variable [DivisionRing 𝕜] [PartialOrder 𝕜] [IsOrderedRing 𝕜]
   [AddCommGroup G] [PartialOrder G] [IsOrderedAddMonoid G] [Module 𝕜 G] {a : 𝕜} {b₁ b₂ : G}
 
 section PosSMulMono
-variable [PosSMulMono 𝕜 G]
+variable [PosSMulMono 𝕜 G] [PosSMulReflectLE 𝕜 G]
 
 lemma inv_smul_le_iff_of_neg (h : a < 0) : a⁻¹ • b₁ ≤ b₂ ↔ a • b₂ ≤ b₁ := by
   rw [← smul_le_smul_iff_of_neg_left h, smul_inv_smul₀ h.ne]
@@ -59,7 +59,7 @@ def OrderIso.smulRightDual (ha : a < 0) : G ≃o Gᵒᵈ where
 
 end PosSMulMono
 
-variable [PosSMulStrictMono 𝕜 G]
+variable [PosSMulStrictMono 𝕜 G] [PosSMulReflectLT 𝕜 G]
 
 lemma inv_smul_lt_iff_of_neg (h : a < 0) : a⁻¹ • b₁ < b₂ ↔ a • b₂ < b₁ := by
   rw [← smul_lt_smul_iff_of_neg_left h, smul_inv_smul₀ h.ne]
@@ -67,7 +67,7 @@ lemma inv_smul_lt_iff_of_neg (h : a < 0) : a⁻¹ • b₁ < b₂ ↔ a • b₂
 lemma smul_inv_lt_iff_of_neg (h : a < 0) : b₁ < a⁻¹ • b₂ ↔ b₂ < a • b₁ := by
   rw [← smul_lt_smul_iff_of_neg_left h, smul_inv_smul₀ h.ne]
 
-end Field
+end DivisionRing
 
 namespace Mathlib.Meta.Positivity
 open Lean Meta Qq Function

@@ -382,6 +382,6 @@ theorem seminormFromBounded_of_mul_is_mul (f_nonneg : 0 ≤ f)
     seminormFromBounded' f (x * y) = seminormFromBounded' f x * seminormFromBounded' f y := by
   rw [seminormFromBounded_of_mul_apply f_nonneg f_mul hx]
   simp only [seminormFromBounded', mul_assoc, hx, mul_div_assoc,
-    Real.mul_iSup_of_nonneg (f_nonneg _)]
+    mul_ciSup_of_nonneg (f_nonneg _)]
 
 end seminormFromBounded

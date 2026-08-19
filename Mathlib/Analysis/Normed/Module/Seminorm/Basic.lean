@@ -10,7 +10,7 @@ public import Mathlib.Algebra.Order.Pi
 public import Mathlib.Analysis.Convex.Function
 public import Mathlib.Analysis.LocallyConvex.Basic
 public import Mathlib.Analysis.Normed.Module.Basic
-public import Mathlib.Data.Real.Pointwise
+public import Mathlib.Order.ConditionallyCompleteLattice.Pointwise
 
 /-!
 # Seminorms
@@ -437,7 +437,7 @@ noncomputable instance instInf : Min (Seminorm 𝕜 E) where
             ciInf_eq_of_forall_ge_of_forall_gt_exists_lt
               (fun i => by positivity)
               fun x hx => ⟨0, by rwa [map_zero, sub_zero, map_zero, add_zero]⟩
-        simp_rw [Real.mul_iInf_of_nonneg (norm_nonneg a), mul_add, ← map_smul_eq_mul p, ←
+        simp_rw [mul_ciInf_of_nonneg (norm_nonneg a), mul_add, ← map_smul_eq_mul p, ←
           map_smul_eq_mul q, smul_sub]
         refine
           Function.Surjective.iInf_congr ((a⁻¹ • ·) : E → E)
@@ -464,7 +464,7 @@ theorem smul_inf [SMul R ℝ] [SMul R ℝ≥0] [IsScalarTower R ℝ≥0 ℝ] (r 
     r • (p ⊓ q) = r • p ⊓ r • q := by
   ext
   simp_rw [smul_apply, inf_apply, smul_apply, ← smul_one_smul ℝ≥0 r (_ : ℝ), NNReal.smul_def,
-    smul_eq_mul, Real.mul_iInf_of_nonneg (NNReal.coe_nonneg _), mul_add]
+    smul_eq_mul, mul_ciInf_of_nonneg (NNReal.coe_nonneg _), mul_add]
 
 section Classical
 
@@ -490,7 +490,7 @@ noncomputable instance instSupSet : SupSet (Seminorm 𝕜 E) where
     if h : BddAbove ((↑) '' s : Set (E → ℝ)) then
       { toFun := ⨆ p : s, ((p : Seminorm 𝕜 E) : E → ℝ)
         map_zero' := by
-          rw [iSup_apply, ← ciSup_const_zero (ι := s) (α := ℝ)]
+          rw [iSup_apply, ← iSup_const_zero₀ (ι := s) (α := ℝ)]
           congr!
           rename_i _ _ _ i
           exact map_zero i.1
@@ -516,7 +516,7 @@ noncomputable instance instSupSet : SupSet (Seminorm 𝕜 E) where
         smul' := fun a x => by
           simp only [iSup_apply]
           rw [← smul_eq_mul,
-            Real.smul_iSup_of_nonneg (norm_nonneg a) fun i : s => (i : Seminorm 𝕜 E) x]
+            smul_ciSup_of_nonneg (norm_nonneg a) fun i : s => (i : Seminorm 𝕜 E) x]
           congr!
           rename_i _ _ _ i
           exact i.1.smul' a x }
@@ -559,7 +559,7 @@ protected theorem iSup_apply {ι : Sort*} {p : ι → Seminorm 𝕜 E}
 
 protected theorem sSup_empty : sSup (∅ : Set (Seminorm 𝕜 E)) = ⊥ := by
   ext
-  rw [Seminorm.sSup_apply bddAbove_empty, ciSup_of_empty₀]
+  rw [Seminorm.sSup_apply bddAbove_empty, iSup_of_empty₀]
   rfl
 
 set_option backward.privateInPublic true in

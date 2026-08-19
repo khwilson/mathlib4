@@ -97,7 +97,7 @@ noncomputable def F [NormedSpace ℂ E] (ε : ℝ) := fun z ↦ invInterpStrip f
 
 /-- `sSup` of `norm` is nonneg applied to the image of `f` on the vertical line `re z = x` -/
 lemma sSupNormIm_nonneg (x : ℝ) : 0 ≤ sSupNormIm f x := by
-  apply sSup_nonneg
+  apply sSup_nonneg₀
   rintro y ⟨z1, _, hz2⟩
   simp only [← hz2, comp, norm_nonneg]
 

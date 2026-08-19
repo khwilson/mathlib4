@@ -134,7 +134,7 @@ theorem spectralValueTerms_nonneg (p : R[X]) (n : ℕ) : 0 ≤ spectralValueTerm
 
 /-- The spectral value of a polynomial is nonnegative. -/
 theorem spectralValue_nonneg (p : R[X]) : 0 ≤ spectralValue p :=
-  iSup_nonneg (spectralValueTerms_nonneg p)
+  iSup_nonneg₀ (spectralValueTerms_nonneg p)
 
 variable [Nontrivial R]
 
@@ -296,7 +296,7 @@ theorem max_norm_root_eq_spectralValue [DecidableEq L] {f : AlgebraNorm K L} (hf
     (hp : mapAlg K L p = (map (fun a : L ↦ X - C a) s).prod) :
     (⨆ x : L, if x ∈ s then f x else 0) = spectralValue p := by
   have h_le : 0 ≤ ⨆ x : L, ite (x ∈ s) (f x) 0 := by
-    apply iSup_nonneg (fun _ ↦ ?_)
+    apply iSup_nonneg₀ (fun _ ↦ ?_)
     split_ifs
     exacts [apply_nonneg _ _, le_refl _]
   apply le_antisymm
@@ -486,7 +486,7 @@ theorem spectralNorm_eq_iSup_of_finiteDimensional_normal
         (Algebra.IsAlgebraic.isAlgebraic x) (aeval_root_of_mapAlg_eq_multiset_prod_X_sub_C s h hs)
       rw [← hσ]
       apply Finite.le_ciSup _ σ
-    · exact iSup_nonneg fun σ ↦ apply_nonneg _ _
+    · exact iSup_nonneg₀ fun σ ↦ apply_nonneg _ _
 
 open IsUltrametricDist
 

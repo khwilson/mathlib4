@@ -702,6 +702,43 @@ theorem u_ciInf_set (gc : GaloisConnection l u) {s : Set γ} {f : γ → β} (hf
 
 end GaloisConnection
 
+namespace GaloisConnection
+
+variable [ConditionallyCompleteLinearOrder α] [ConditionallyCompleteLinearOrder β] [Zero α]
+  [Zero β] {l : α → β} {u : β → α}
+
+/-- Under the `sSup ∅ = 0` convention, a left adjoint sending `0` to `0` commutes with `sSup`
+unconditionally: the empty set and the unbounded case both land on `0`, the latter because the
+adjunction turns an upper bound for `l '' s` into one for `s`.
+
+This is the form that covers scalar multiplication by both invertible scalars, where the adjoint is
+`a⁻¹ • ·`, and non-invertible ones such as in `ℕ` or `ℤ`, where it is flooring division. -/
+theorem l_csSup₀ [SupSetEmptyZero α] [SupSetEmptyZero β] (gc : GaloisConnection l u)
+    (hl : l 0 = 0) (s : Set α) : l (sSup s) = sSup (l '' s) := by
+  obtain rfl | hs := s.eq_empty_or_nonempty
+  · rw [image_empty, sSup_empty_eq_zero, sSup_empty_eq_zero]
+    exact hl
+  by_cases h : BddAbove s
+  · exact gc.l_csSup' hs h
+  · have h' : ¬BddAbove (l '' s) := fun ⟨b, hb⟩ ↦
+      h ⟨u b, fun _ hx ↦ gc.le_u (hb (mem_image_of_mem _ hx))⟩
+    rw [csSup_of_not_bddAbove₀ h, csSup_of_not_bddAbove₀ h', hl]
+
+/-- The dual of `GaloisConnection.l_csSup₀`: a right adjoint fixing `0` commutes with `sInf`
+unconditionally, under the `sInf ∅ = 0` convention. -/
+theorem u_csInf₀ [InfSetEmptyZero α] [InfSetEmptyZero β] (gc : GaloisConnection l u)
+    (hu : u 0 = 0) (s : Set β) : u (sInf s) = sInf (u '' s) := by
+  obtain rfl | hs := s.eq_empty_or_nonempty
+  · rw [image_empty, sInf_empty_eq_zero, sInf_empty_eq_zero]
+    exact hu
+  by_cases h : BddBelow s
+  · exact gc.u_csInf' hs h
+  · have h' : ¬BddBelow (u '' s) := fun ⟨b, hb⟩ ↦
+      h ⟨l b, fun _ hx ↦ gc.l_le (hb (mem_image_of_mem _ hx))⟩
+    rw [csInf_of_not_bddBelow₀ h, csInf_of_not_bddBelow₀ h', hu]
+
+end GaloisConnection
+
 namespace OrderIso
 
 section ConditionallyCompleteLattice

@@ -8,6 +8,9 @@ module
 public import Mathlib.Algebra.Order.Archimedean.Real.Basic
 public import Mathlib.Order.ConditionallyCompleteLattice.Pointwise
 
+deprecated_module "Use Mathlib.Order.ConditionallyCompleteLattice.Pointwise instead"
+  (since := "2026-08-18")
+
 /-!
 # Pointwise operations on sets of reals
 

@@ -321,7 +321,7 @@ private lemma hasFiniteMulSupport_iSup_nonarchAbsVal {x : ι → K} (hx : x ≠ 
     refine le_antisymm (ciSup_le fun j ↦ ?_) (ciSup_le fun ⟨j, hj⟩ ↦ Finite.le_ciSup_of_le j le_rfl)
     rcases eq_or_ne (x j) 0 with h | h
     · rw [h, v.val.map_zero]
-      exact iSup_nonneg' ⟨⟨i, hi⟩, v.val.nonneg ..⟩
+      exact iSup_nonneg_of_exists₀ ⟨⟨i, hi⟩, v.val.nonneg ..⟩
     · exact Finite.le_ciSup_of_le ⟨j, h⟩ le_rfl
   fun_prop (disch := grind)
 
@@ -340,7 +340,7 @@ lemma mulHeight_smul_eq_mulHeight (x : ι → K) {c : K} (hc : c ≠ 0) :
   have : Nonempty ι := (ne_iff.mp hx).nonempty
   have hcx : c • x ≠ 0 := by simp [hc, hx]
   simp only [mulHeight_eq hx, mulHeight_eq hcx, Pi.smul_apply, smul_eq_mul, map_mul,
-    ← mul_iSup_of_nonneg <| AbsoluteValue.nonneg .., Multiset.prod_map_mul]
+    ← mul_ciSup_of_nonneg <| AbsoluteValue.nonneg .., Multiset.prod_map_mul]
   rw [finprod_mul_distrib (by fun_prop) (by fun_prop),
     mul_mul_mul_comm, product_formula hc, one_mul]
 

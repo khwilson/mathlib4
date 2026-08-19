@@ -462,7 +462,7 @@ theorem stdPart_eq_sInf (f : ℝ →+*o K) (x : K) : stdPart x = sInf {r | x < f
   · rw [stdPart_of_mk_ne_zero hx.ne]
     have hr {r} := hx.trans_le (mk_map_nonneg_of_archimedean f r)
     obtain h | h := le_or_gt 0 x
-    · convert! Real.sInf_empty.symm
+    · convert! (sInf_empty_eq_zero (α := ℝ)).symm
       rw [Set.eq_empty_iff_forall_notMem]
       exact fun r ↦ (lt_of_mk_lt_mk_of_nonneg hr h).not_gt
     · convert! Real.sInf_univ.symm

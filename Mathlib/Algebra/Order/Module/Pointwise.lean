@@ -82,10 +82,10 @@ lemma BddAbove.smul_of_nonpos (ha : a ≤ 0) (hs : BddAbove s) : BddBelow (a •
 
 end OrderedRing
 
-section LinearOrderedField
-variable [Field α] [LinearOrder α] [IsStrictOrderedRing α]
+section DivisionRing
+variable [DivisionRing α] [PartialOrder α] [IsOrderedRing α]
   [AddCommGroup β] [PartialOrder β] [IsOrderedAddMonoid β]
-  [Module α β] [PosSMulMono α β] {s : Set β}
+  [Module α β] [PosSMulMono α β] [PosSMulReflectLE α β] {s : Set β}
   {a : α}
 
 @[simp] lemma lowerBounds_smul_of_neg (ha : a < 0) : lowerBounds (a • s) = a • upperBounds s :=
@@ -100,4 +100,4 @@ variable [Field α] [LinearOrder α] [IsStrictOrderedRing α]
 @[simp] lemma bddAbove_smul_iff_of_neg (ha : a < 0) : BddAbove (a • s) ↔ BddBelow s :=
   (OrderIso.smulRightDual β ha).bddBelow_image
 
-end LinearOrderedField
+end DivisionRing

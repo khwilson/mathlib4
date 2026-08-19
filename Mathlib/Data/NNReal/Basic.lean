@@ -11,9 +11,9 @@ public import Mathlib.Algebra.Order.BigOperators.Group.Finset
 public import Mathlib.Algebra.Order.BigOperators.GroupWithZero.Finset
 public import Mathlib.Algebra.Order.Field.Canonical
 public import Mathlib.Algebra.Order.Nonneg.Floor
-public import Mathlib.Data.Real.Pointwise
 public import Mathlib.Data.NNReal.Defs
 public import Mathlib.Order.ConditionallyCompleteLattice.Group
+public import Mathlib.Order.ConditionallyCompleteLattice.Pointwise
 public import Mathlib.Order.Lattice.Nat
 
 /-!
@@ -164,20 +164,17 @@ open Set
 
 variable {ι : Sort*} {f : ι → ℝ≥0}
 
-theorem iInf_mul (f : ι → ℝ≥0) (a : ℝ≥0) : iInf f * a = ⨅ i, f i * a := by
-  rw [← coe_inj, NNReal.coe_mul, coe_iInf, coe_iInf]
-  exact ciInf_mul_of_nonneg (NNReal.coe_nonneg _) _
+theorem iInf_mul (f : ι → ℝ≥0) (a : ℝ≥0) : iInf f * a = ⨅ i, f i * a :=
+  ciInf_mul_of_nonneg zero_le f
 
-theorem mul_iInf (f : ι → ℝ≥0) (a : ℝ≥0) : a * iInf f = ⨅ i, a * f i := by
-  simpa only [mul_comm] using iInf_mul f a
+theorem mul_iInf (f : ι → ℝ≥0) (a : ℝ≥0) : a * iInf f = ⨅ i, a * f i :=
+  mul_ciInf_of_nonneg zero_le f
 
-theorem mul_iSup (f : ι → ℝ≥0) (a : ℝ≥0) : (a * ⨆ i, f i) = ⨆ i, a * f i := by
-  rw [← coe_inj, NNReal.coe_mul, NNReal.coe_iSup, NNReal.coe_iSup]
-  exact mul_ciSup_of_nonneg (NNReal.coe_nonneg _) _
+theorem mul_iSup (f : ι → ℝ≥0) (a : ℝ≥0) : (a * ⨆ i, f i) = ⨆ i, a * f i :=
+  mul_ciSup_of_nonneg zero_le f
 
-theorem iSup_mul (f : ι → ℝ≥0) (a : ℝ≥0) : (⨆ i, f i) * a = ⨆ i, f i * a := by
-  rw [mul_comm, mul_iSup]
-  simp_rw [mul_comm]
+theorem iSup_mul (f : ι → ℝ≥0) (a : ℝ≥0) : (⨆ i, f i) * a = ⨆ i, f i * a :=
+  ciSup_mul_of_nonneg zero_le f
 
 theorem iSup_div (f : ι → ℝ≥0) (a : ℝ≥0) : (⨆ i, f i) / a = ⨆ i, f i / a := by
   simp only [div_eq_mul_inv, iSup_mul]

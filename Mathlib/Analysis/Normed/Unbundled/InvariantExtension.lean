@@ -118,7 +118,7 @@ def invariantExtension : AlgebraNorm K L where
       (Finite.le_ciSup (fun σ ↦ (algNormOfAlgEquiv σ) x) AlgEquiv.refl))
   smul' r x := by
     simp only [AlgebraNormClass.map_smul_eq_mul,
-      Real.mul_iSup_of_nonneg (norm_nonneg _)]
+      mul_ciSup_of_nonneg (norm_nonneg _)]
 
 @[simp]
 theorem invariantExtension_apply (x : L) :

@@ -10,6 +10,7 @@ public import Mathlib.Algebra.Order.Group.Basic
 public import Mathlib.Algebra.Order.GroupWithZero.Action.Synonym
 public import Mathlib.Algebra.Order.Monoid.Unbundled.Pow
 public import Mathlib.Algebra.Order.Ring.Defs
+public import Mathlib.Order.GaloisConnection.Defs
 public import Mathlib.Order.Hom.Basic
 public import Mathlib.Algebra.GroupWithZero.Action.Units
 
@@ -927,6 +928,18 @@ lemma inv_smul_le_iff_of_pos [PosSMulMono α β] [PosSMulReflectLE α β] (ha : 
 
 lemma le_inv_smul_iff_of_pos [PosSMulMono α β] [PosSMulReflectLE α β] (ha : 0 < a) :
     b₁ ≤ a⁻¹ • b₂ ↔ a • b₁ ≤ b₂ := by rw [← smul_le_smul_iff_of_pos_left ha, smul_inv_smul₀ ha.ne']
+
+/-- For `0 < a`, scalar multiplication by `a` is left adjoint to scalar multiplication by `a⁻¹`.
+Being a left adjoint is what makes `a • ·` commute with suprema, in whatever form they exist:
+`GaloisConnection.isLUB_l_image` in a bare preorder, `GaloisConnection.l_csSup₀` and hence
+`csSup_smul_of_nonneg` in a conditionally complete linear order. -/
+lemma galoisConnection_smul_inv_smul [PosSMulMono α β] [PosSMulReflectLE α β] (ha : 0 < a) :
+    GaloisConnection (a • · : β → β) (a⁻¹ • ·) := fun _ _ ↦ (le_inv_smul_iff_of_pos ha).symm
+
+/-- For `0 < a`, scalar multiplication by `a` is right adjoint to scalar multiplication by `a⁻¹`.
+Dually to `galoisConnection_smul_inv_smul`, this is what makes `a • ·` commute with infima. -/
+lemma galoisConnection_inv_smul_smul [PosSMulMono α β] [PosSMulReflectLE α β] (ha : 0 < a) :
+    GaloisConnection (a⁻¹ • · : β → β) (a • ·) := fun _ _ ↦ inv_smul_le_iff_of_pos ha
 
 lemma inv_smul_lt_iff_of_pos [PosSMulStrictMono α β] [PosSMulReflectLT α β] (ha : 0 < a) :
     a⁻¹ • b₁ < b₂ ↔ b₁ < a • b₂ := by rw [← smul_lt_smul_iff_of_pos_left ha, smul_inv_smul₀ ha.ne']
